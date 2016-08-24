@@ -15,10 +15,34 @@
 
 package org.aph.liblouisgui;
 
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
 public class Main
 {
+	private final Shell shell;
+
+	public Main(String args[])
+	{
+		Display.setAppName("LibLouisGUI");
+
+		Display display = Display.getDefault();
+
+		shell = new Shell(display);
+		shell.setLayout(new FillLayout());
+		shell.setText("LibLouisGUI");
+
+		shell.open();
+		while(!shell.isDisposed())
+		if(!display.readAndDispatch())
+			display.sleep();
+
+		display.dispose();
+	}
+
 	public static void main(String args[])
 	{
-		
+		new Main(args);
 	}
 }

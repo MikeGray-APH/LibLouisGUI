@@ -15,37 +15,18 @@
 
 package org.aph.liblouisgui;
 
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Shell;
 
-public class Main
+public class TextTranslate
 {
-	private final Shell shell;
+	private final Shell parentShell;
+	private final StyledText styledText;
 
-	public Main(String args[])
+	public TextTranslate(Shell parentShell)
 	{
-		Display.setAppName("LibLouisGUI");
-
-		Display display = Display.getDefault();
-
-		shell = new Shell(display);
-		shell.setLayout(new FillLayout());
-		shell.setText("LibLouisGUI");
-
-		Message.setShell(shell);
-		new TextTranslate(shell);
-
-		shell.open();
-		while(!shell.isDisposed())
-		if(!display.readAndDispatch())
-			display.sleep();
-
-		display.dispose();
-	}
-
-	public static void main(String args[])
-	{
-		new Main(args);
+		this.parentShell = parentShell;
+		styledText = new StyledText(parentShell, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
 	}
 }

@@ -17,6 +17,7 @@ package org.aph.liblouisgui;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Shell;
 
 public class TextTranslate
@@ -27,6 +28,8 @@ public class TextTranslate
 	public TextTranslate(Shell parentShell)
 	{
 		this.parentShell = parentShell;
+
 		styledText = new StyledText(parentShell, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
+		styledText.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, true, 1, 1));
 	}
 }

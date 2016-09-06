@@ -15,7 +15,7 @@
 
 package org.aph.liblouisgui;
 
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -30,12 +30,15 @@ public class Main
 		Display display = Display.getDefault();
 
 		shell = new Shell(display);
-		shell.setLayout(new FillLayout());
+		shell.setLayout(new GridLayout(1, true));
 		shell.setText("LibLouisGUI");
 
 		Message.setShell(shell);
+		new Actions(shell);
 		new TextTranslate(shell);
 
+		//   need to set size after everthing has been added
+		shell.setSize(320, 240);
 		shell.open();
 		while(!shell.isDisposed())
 		if(!display.readAndDispatch())

@@ -33,6 +33,8 @@ public class Main
 		shell.setLayout(new FillLayout());
 		shell.setText("LibLouisGUI");
 
+		Message.setShell(shell);
+
 		shell.open();
 		while(!shell.isDisposed())
 		if(!display.readAndDispatch())

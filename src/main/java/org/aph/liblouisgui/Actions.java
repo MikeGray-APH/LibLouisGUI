@@ -18,15 +18,21 @@ package org.aph.liblouisgui;
 import com.sun.jna.Memory;
 import com.sun.jna.ptr.IntByReference;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
@@ -35,19 +41,20 @@ import java.io.UnsupportedEncodingException;
 public class Actions
 {
 	private final Shell parentShell;
+	private final Settings settings;
 	private final TextTranslate textTranslate;
 
-	public Actions(Shell parentShell, TextTranslate textTranslate)
+	public Actions(Shell parentShell, Settings settings, TextTranslate textTranslate)
 	{
 		this.parentShell = parentShell;
+		this.settings = settings;
 		this.textTranslate = textTranslate;
 
 		Menu menuBar = new Menu(parentShell, SWT.BAR);
+		parentShell.setMenuBar(menuBar);
 
 		ToolBar toolBar = new ToolBar(parentShell, SWT.HORIZONTAL | SWT.FLAT);
-
 		toolBar.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1));
-		parentShell.setMenuBar(menuBar);
 
 		Menu menu;
 		MenuItem item;
@@ -66,8 +73,9 @@ public class Actions
 		item.setText("&LibLouis");
 		item.setMenu(menu);
 
-		new SetLibLouisPathDialogAction().addToMenuAndToolBar(menu, toolBar, "Set LibLouis Path", 0, true);
-		new SetDirectoryPathDialogAction().addToMenuAndToolBar(menu, toolBar, "Set Data Path", 0, true);
+		new SetLibLouisPathDialogAction().addToMenu(menu, "Set LibLouis Path", 0, true);
+		new SetTablePathDialogAction().addToMenu(menu, "Set Table Path", 0, true);
+		new SetTableListAction().addToMenu(menu, "Set tables", 0, true);
 
 		//   translate menu
 		menu = new Menu(menuBar);
@@ -84,16 +92,17 @@ public class Actions
 		public void widgetSelected(SelectionEvent ignored)
 		{
 			FileDialog fileDialog = new FileDialog(parentShell, SWT.OPEN);
-			fileDialog.setFileName(LibLouis.getLibraryPath());
+			fileDialog.setFileName(settings.libraryFileName);
 			String fileName = fileDialog.open();
 			if(fileName == null)
 				return;
 
+			settings.libraryFileName = fileName;
 			LibLouis.loadLibrary(fileName);
 		}
 	}
 
-	private final class SetDirectoryPathDialogAction extends BaseAction
+	private final class SetTablePathDialogAction extends BaseAction
 	{
 		@Override
 		public void widgetSelected(SelectionEvent ignored)
@@ -103,8 +112,79 @@ public class Actions
 			if(directoryName == null)
 				return;
 
-			LibLouis.setDataPath(directoryName);
+			settings.tablePath = directoryName;
+			LibLouis.lou_setDataPath(directoryName);
 		}
+	}
+
+	private final class SetTableListAction extends BaseAction
+	{
+		@Override
+		public void widgetSelected(SelectionEvent ignored)
+		{
+			new SetTableListDialog();
+		}
+	}
+
+	private final class SetTableListDialog implements SelectionListener, KeyListener
+	{
+		private final Shell shell;
+		private final Text text;
+		private final Button okButton;
+		private final Button cancelButton;
+
+		private SetTableListDialog()
+		{
+			shell = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
+			shell.setText("tables");
+			shell.setLayout(new GridLayout(1, true));
+
+			text = new Text(shell, SWT.SINGLE | SWT.LEFT);
+			text.setText(settings.tableList);
+			text.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1));
+			text.addKeyListener(this);
+
+			Composite composite = new Composite(shell, 0);
+			composite.setLayout(new GridLayout(2, true));
+			composite.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, true));
+
+			okButton = new Button(composite, SWT.PUSH);
+			okButton.setText("OK");
+			okButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+			okButton.addSelectionListener(this);
+
+			cancelButton = new Button(composite, SWT.PUSH);
+			cancelButton.setText("Cancel");
+			cancelButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+			cancelButton.addSelectionListener(this);
+
+			shell.pack();
+			shell.open();
+		}
+
+		@Override
+		public void widgetSelected(SelectionEvent event)
+		{
+			if(event.widget == okButton)
+				settings.tableList = text.getText();
+			shell.dispose();
+		}
+
+		@Override
+		public void widgetDefaultSelected(SelectionEvent ignored){}
+
+		@Override
+		public void keyPressed(KeyEvent event)
+		{
+			if(event.keyCode == '\r' || event.keyCode == '\n')
+			{
+				settings.tableList = text.getText();
+				shell.dispose();
+			}
+		}
+
+		@Override
+		public void keyReleased(KeyEvent ignored){}
 	}
 
 	private final class TranslateAction extends BaseAction
@@ -176,6 +256,18 @@ public class Actions
 			toolItem.setText(tag);
 			toolItem.addSelectionListener(this);
 			toolItem.setEnabled(enabled);
+		}
+
+		void addToMenu(Menu menu, String tag, int accelerator, boolean enabled)
+		{
+			this.enabled = enabled;
+
+			menuItem = new MenuItem(menu, SWT.PUSH);
+			menuItem.setText(tag);
+			if(accelerator != 0)
+				menuItem.setAccelerator(accelerator);
+			menuItem.addSelectionListener(this);
+			menuItem.setEnabled(enabled);
 		}
 
 		void setEnabled(boolean enabled)

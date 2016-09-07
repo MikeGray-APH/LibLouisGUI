@@ -34,8 +34,15 @@ public class Main
 		shell.setText("LibLouisGUI");
 
 		Message.setShell(shell);
+
+		Settings settings = new Settings(null);
+		settings.readSettings();
+
+		LibLouis.loadLibrary(settings.libraryFileName);
+		LibLouis.lou_setDataPath(settings.tablePath);
+
 		TextTranslate textTranslate = new TextTranslate(shell);
-		new Actions(shell, textTranslate);
+		new Actions(shell, settings, textTranslate);
 
 		//   need to set size after everthing has been added
 		shell.setSize(320, 240);
@@ -45,6 +52,8 @@ public class Main
 			display.sleep();
 
 		display.dispose();
+
+		settings.writeSettings();
 	}
 
 	public static void main(String args[])

@@ -22,29 +22,11 @@ import com.sun.jna.ptr.IntByReference;
 
 public class LibLouis
 {
-	private static String libraryPath, dataPath;
-
-	public static String getLibraryPath()
-	{
-		return libraryPath;
-	}
 
 	public static void loadLibrary(String libraryPath)
 	{
-		LibLouis.libraryPath = libraryPath;
-
 		NativeLibrary library = NativeLibrary.getInstance(libraryPath);
 		Native.register(library);
-	}
-
-	public static String getDataPath()
-	{
-		return dataPath;
-	}
-
-	public static void setDataPath(String dataPath)
-	{
-		LibLouis.dataPath = dataPath;
 	}
 
 	public static native String lou_version();

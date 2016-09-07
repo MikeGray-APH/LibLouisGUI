@@ -33,6 +33,21 @@ public class TextTranslate
 		styledText.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, true, 1, 1));
 	}
 
+	public void cut()
+	{
+		styledText.cut();
+	}
+
+	public void copy()
+	{
+		styledText.copy();
+	}
+
+	public void paste()
+	{
+		styledText.paste();
+	}
+
 	public String getText()
 	{
 		return styledText.getText();

@@ -75,6 +75,16 @@ public class Message
 		messageError(message, exception, true);
 	}
 
+	static void messageError(String message, Error error, boolean showMessage)
+	{
+		messageError(message, error.getMessage(), showMessage);
+	}
+
+	static void messageError(String message, Error error)
+	{
+		messageError(message, error, true);
+	}
+
 	static void messageError(String message, String info)
 	{
 		messageError(message, info, true);

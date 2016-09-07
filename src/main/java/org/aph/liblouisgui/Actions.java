@@ -15,8 +15,6 @@
 
 package org.aph.liblouisgui;
 
-import com.sun.jna.Memory;
-import com.sun.jna.ptr.IntByReference;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -55,6 +53,7 @@ public class Actions
 
 		ToolBar toolBar = new ToolBar(parentShell, SWT.HORIZONTAL | SWT.FLAT);
 		toolBar.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1));
+		toolBar.moveAbove(null);
 
 		Menu menu;
 		MenuItem item;
@@ -76,6 +75,17 @@ public class Actions
 		new SetLibLouisPathDialogAction().addToMenu(menu, "Set LibLouis Path", 0, true);
 		new SetTablePathDialogAction().addToMenu(menu, "Set Table Path", 0, true);
 		new SetTableListAction().addToMenu(menu, "Set tables", 0, true);
+
+		//   edit menu
+		menu = new Menu(menuBar);
+		item = new MenuItem(menuBar, SWT.CASCADE);
+		item.setText("&Edit");
+		item.setMenu(menu);
+
+		//   cut, copy, and paste accelerators are handled by StyledText.
+		new CutAction().addToMenu(menu, "Cut\t" + mod1KeyName + "X", 0, true);
+		new CopyAction().addToMenu(menu, "Copy\t" + mod1KeyName + "C", 0, true);
+		new PasteAction().addToMenu(menu, "Paste\t" + mod1KeyName + "V", 0, true);
 
 		//   translate menu
 		menu = new Menu(menuBar);
@@ -187,50 +197,59 @@ public class Actions
 		public void keyReleased(KeyEvent ignored){}
 	}
 
+	private class CutAction extends BaseAction
+	{
+		@Override
+		public void widgetSelected(SelectionEvent ignored)
+		{
+			textTranslate.cut();
+		}
+	}
+
+	private class CopyAction extends BaseAction
+	{
+		@Override
+		public void widgetSelected(SelectionEvent ignored)
+		{
+			textTranslate.copy();
+		}
+	}
+
+	private class PasteAction extends BaseAction
+	{
+		@Override
+		public void widgetSelected(SelectionEvent ignored)
+		{
+			textTranslate.paste();
+		}
+	}
+
 	private final class TranslateAction extends BaseAction
 	{
 		@Override
 		public void widgetSelected(SelectionEvent ignored)
 		{
 			String inputString = textTranslate.getText();
+			if(inputString.length() == 0)
+				return;
 
-			byte inputBytes[];
+			String outputString = null;
 			try
 			{
-				inputBytes = inputString.getBytes("UTF-16LE");
+				outputString = LibLouis.translateString(settings.tableList, inputString, inputString.length() * 3, null, null, 0);
 			}
 			catch(UnsupportedEncodingException exception)
 			{
-				Message.messageError("Input Error", exception, true);
-				return;
+				Message.messageError("UnsupportedEncodingException", exception, true);
 			}
-
-			Memory inbuf = new Memory(inputBytes.length);
-			inbuf.write(0, inputBytes, 0, inputBytes.length);
-			IntByReference inlen = new IntByReference(inputString.length());
-
-			Memory outbuf = new Memory(inputBytes.length * 5);
-			IntByReference outlen = new IntByReference(inputBytes.length * 5);
-
-			int result = LibLouis.lou_translateString("en-ueb-g2.ctb", inbuf, inlen, outbuf, outlen, null, null, 0);
-
-			int length = outlen.getValue();
-			byte outputBytes[] = outbuf.getByteArray(0, length * 2);
-			String outputString;
-			try
+			catch(UnsatisfiedLinkError error)
 			{
-				outputString = new String(outputBytes, "UTF-16LE");
-			}
-			catch(UnsupportedEncodingException exception)
-			{
-				Message.messageError("Output Error", exception, true);
-				return;
+				Message.messageError("UnsatisfiedLinkError", error, true);
 			}
 
 			MessageBox messageBox = new MessageBox(parentShell, SWT.ICON_INFORMATION | SWT.OK);
 			messageBox.setMessage(outputString);
 			messageBox.open();
-
 		}
 	}
 

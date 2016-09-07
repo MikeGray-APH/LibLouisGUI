@@ -29,7 +29,12 @@ public class TextTranslate
 	{
 		this.parentShell = parentShell;
 
-		styledText = new StyledText(parentShell, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
+		styledText = new StyledText(parentShell, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.WRAP);
 		styledText.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, true, 1, 1));
+	}
+
+	public String getText()
+	{
+		return styledText.getText();
 	}
 }

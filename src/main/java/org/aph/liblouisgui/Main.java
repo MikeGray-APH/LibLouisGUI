@@ -34,8 +34,8 @@ public class Main
 		shell.setText("LibLouisGUI");
 
 		Message.setShell(shell);
-		new Actions(shell);
-		new TextTranslate(shell);
+		TextTranslate textTranslate = new TextTranslate(shell);
+		new Actions(shell, textTranslate);
 
 		//   need to set size after everthing has been added
 		shell.setSize(320, 240);

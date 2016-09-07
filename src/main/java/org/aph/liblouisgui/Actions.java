@@ -15,23 +15,32 @@
 
 package org.aph.liblouisgui;
 
+import com.sun.jna.Memory;
+import com.sun.jna.ptr.IntByReference;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
+import java.io.UnsupportedEncodingException;
+
 public class Actions
 {
 	private final Shell parentShell;
+	private final TextTranslate textTranslate;
 
-	public Actions(Shell parentShell)
+	public Actions(Shell parentShell, TextTranslate textTranslate)
 	{
 		this.parentShell = parentShell;
+		this.textTranslate = textTranslate;
 
 		Menu menuBar = new Menu(parentShell, SWT.BAR);
 
@@ -51,6 +60,15 @@ public class Actions
 			mod2KeyName = "⇧";
 		}
 
+		//   LibLouis menu
+		menu = new Menu(menuBar);
+		item = new MenuItem(menuBar, SWT.CASCADE);
+		item.setText("&LibLouis");
+		item.setMenu(menu);
+
+		new SetLibLouisPathDialogAction().addToMenuAndToolBar(menu, toolBar, "Set LibLouis Path", 0, true);
+		new SetDirectoryPathDialogAction().addToMenuAndToolBar(menu, toolBar, "Set Data Path", 0, true);
+
 		//   translate menu
 		menu = new Menu(menuBar);
 		item = new MenuItem(menuBar, SWT.CASCADE);
@@ -60,12 +78,79 @@ public class Actions
 		new TranslateAction().addToMenuAndToolBar(menu, toolBar, "translate", 0, true);
 	}
 
-	private static class TranslateAction extends BaseAction
+	private final class SetLibLouisPathDialogAction extends BaseAction
 	{
 		@Override
 		public void widgetSelected(SelectionEvent ignored)
 		{
-			System.out.println("pressed");
+			FileDialog fileDialog = new FileDialog(parentShell, SWT.OPEN);
+			fileDialog.setFileName(LibLouis.getLibraryPath());
+			String fileName = fileDialog.open();
+			if(fileName == null)
+				return;
+
+			LibLouis.loadLibrary(fileName);
+		}
+	}
+
+	private final class SetDirectoryPathDialogAction extends BaseAction
+	{
+		@Override
+		public void widgetSelected(SelectionEvent ignored)
+		{
+			DirectoryDialog directoryDialog = new DirectoryDialog(parentShell, SWT.OPEN);
+			String directoryName = directoryDialog.open();
+			if(directoryName == null)
+				return;
+
+			LibLouis.setDataPath(directoryName);
+		}
+	}
+
+	private final class TranslateAction extends BaseAction
+	{
+		@Override
+		public void widgetSelected(SelectionEvent ignored)
+		{
+			String inputString = textTranslate.getText();
+
+			byte inputBytes[];
+			try
+			{
+				inputBytes = inputString.getBytes("UTF-16LE");
+			}
+			catch(UnsupportedEncodingException exception)
+			{
+				Message.messageError("Input Error", exception, true);
+				return;
+			}
+
+			Memory inbuf = new Memory(inputBytes.length);
+			inbuf.write(0, inputBytes, 0, inputBytes.length);
+			IntByReference inlen = new IntByReference(inputBytes.length);
+
+			Memory outbuf = new Memory(inputBytes.length * 2);
+			IntByReference outlen = new IntByReference(inputBytes.length * 2);
+
+			int result = LibLouis.lou_translateString("en-ueb-g2.ctb", inbuf, inlen, outbuf, outlen, null, null, 0);
+
+			int length = outlen.getValue();
+			byte outputBytes[] = outbuf.getByteArray(0, length * 2);
+			String outputString;
+			try
+			{
+				outputString = new String(outputBytes, "UTF-16LE");
+			}
+			catch(UnsupportedEncodingException exception)
+			{
+				Message.messageError("Output Error", exception, true);
+				return;
+			}
+
+			MessageBox messageBox = new MessageBox(parentShell, SWT.ICON_INFORMATION | SWT.OK);
+			messageBox.setMessage(outputString);
+			messageBox.open();
+
 		}
 	}
 

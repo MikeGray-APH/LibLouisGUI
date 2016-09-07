@@ -45,6 +45,7 @@ default:
 
 dependencies {
 	compile group: 'org.eclipse.swt', name: swtJar, version: '4.+'
+	compile group: 'net.java.dev.jna', name: 'jna', version: '4.+'
 
 	archives group: 'org.eclipse.swt', name: 'org.eclipse.swt.gtk.linux.x86_64', version: '4.+'
 	archives group: 'org.eclipse.swt', name: 'org.eclipse.swt.gtk.linux.x86', version: '4.+'

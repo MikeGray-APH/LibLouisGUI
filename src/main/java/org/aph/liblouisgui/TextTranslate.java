@@ -24,6 +24,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
+import java.util.ArrayList;
+
 public class TextTranslate
 {
 	private final Shell parentShell;
@@ -62,24 +64,68 @@ public class TextTranslate
 		textCurrent.paste();
 	}
 
-	public String getTextText()
+	public String getText()
 	{
 		return textText.getText();
 	}
 
-	public void setTextText(String string)
+	public void setText(String string)
 	{
 		textText.setText(string);
 	}
 
-	public String getTextBraille()
+	public String[] getTextLines()
+	{
+		ArrayList<String> arrayList = new ArrayList<>();
+		for(int i = 0; i < textText.getLineCount(); i++)
+			arrayList.add(textText.getLine(i));
+
+		return arrayList.toArray(new String[arrayList.size()]);
+	}
+
+	public void setTextLines(String[] lines)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		if(lines.length > 0)
+		{
+			stringBuilder.append(lines[0]);
+			for(int i = 1; i < lines.length; i++)
+				stringBuilder.append("\n" + lines[i]);
+		}
+
+		textText.setText(stringBuilder.toString());
+	}
+
+	public String getBraille()
 	{
 		return textBraille.getText();
 	}
 
-	public void setTextBraille(String string)
+	public void setBraille(String string)
 	{
 		textBraille.setText(string);
+	}
+
+	public String[] getBrailleLines()
+	{
+		ArrayList<String> arrayList = new ArrayList<>();
+		for(int i = 0; i < textBraille.getLineCount(); i++)
+			arrayList.add(textBraille.getLine(i));
+
+		return arrayList.toArray(new String[arrayList.size()]);
+	}
+
+	public void setBrailleLines(String[] lines)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		if(lines.length > 0)
+		{
+			stringBuilder.append(lines[0]);
+			for(int i = 1; i < lines.length; i++)
+				stringBuilder.append("\n" + lines[i]);
+		}
+
+		textBraille.setText(stringBuilder.toString());
 	}
 
 	private final class FocusHandler implements FocusListener

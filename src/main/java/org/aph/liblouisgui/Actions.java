@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 
 public class Actions
 {
@@ -229,25 +230,37 @@ public class Actions
 		@Override
 		public void widgetSelected(SelectionEvent ignored)
 		{
-			String inputString = textTranslate.getTextText();
-			if(inputString.length() == 0)
+			String inputLines[] = textTranslate.getTextLines();
+			if(inputLines.length == 0)
 				return;
 
-			String outputString = null;
-			try
+			ArrayList<String> outputLines = new ArrayList<>();
+
+			for(String inputLine : inputLines)
 			{
-				outputString = LibLouis.translateString(settings.tableList, inputString, inputString.length() * 3, null, null, 0);
-			}
-			catch(UnsupportedEncodingException exception)
-			{
-				Message.messageError("UnsupportedEncodingException", exception, true);
-			}
-			catch(UnsatisfiedLinkError error)
-			{
-				Message.messageError("UnsatisfiedLinkError", error, true);
+				if(inputLine.length() == 0)
+				{
+					outputLines.add("");
+					continue;
+				}
+
+				String outputLine = "";
+				try
+				{
+					outputLine = LibLouis.translateString(settings.tableList, inputLine, inputLine.length() * 3, null, null, 0);
+				}
+				catch(UnsupportedEncodingException exception)
+				{
+					Message.messageError("UnsupportedEncodingException", exception, true);
+				}
+				catch(UnsatisfiedLinkError error)
+				{
+					Message.messageError("UnsatisfiedLinkError", error, true);
+				}
+				outputLines.add(outputLine);
 			}
 
-			textTranslate.setTextBraille(outputString);
+			textTranslate.setBrailleLines(outputLines.toArray(new String[outputLines.size()]));
 		}
 	}
 
@@ -256,25 +269,37 @@ public class Actions
 		@Override
 		public void widgetSelected(SelectionEvent ignored)
 		{
-			String inputString = textTranslate.getTextBraille();
-			if(inputString.length() == 0)
+			String inputLines[] = textTranslate.getBrailleLines();
+			if(inputLines.length == 0)
 				return;
 
-			String outputString = null;
-			try
+			ArrayList<String> outputLines = new ArrayList<>();
+
+			for(String inputLine : inputLines)
 			{
-				outputString = LibLouis.backTranslateString(settings.tableList, inputString, inputString.length() * 3, null, null, 0);
-			}
-			catch(UnsupportedEncodingException exception)
-			{
-				Message.messageError("UnsupportedEncodingException", exception, true);
-			}
-			catch(UnsatisfiedLinkError error)
-			{
-				Message.messageError("UnsatisfiedLinkError", error, true);
+				if(inputLine.length() == 0)
+				{
+					outputLines.add("");
+					continue;
+				}
+
+				String outputLine = "";
+				try
+				{
+					outputLine = LibLouis.backTranslateString(settings.tableList, inputLine, inputLine.length() * 3, null, null, 0);
+				}
+				catch(UnsupportedEncodingException exception)
+				{
+					Message.messageError("UnsupportedEncodingException", exception, true);
+				}
+				catch(UnsatisfiedLinkError error)
+				{
+					Message.messageError("UnsatisfiedLinkError", error, true);
+				}
+				outputLines.add(outputLine);
 			}
 
-			textTranslate.setTextText(outputString);
+			textTranslate.setTextLines(outputLines.toArray(new String[outputLines.size()]));
 		}
 	}
 

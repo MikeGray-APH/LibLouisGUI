@@ -207,10 +207,10 @@ public class Actions
 
 			Memory inbuf = new Memory(inputBytes.length);
 			inbuf.write(0, inputBytes, 0, inputBytes.length);
-			IntByReference inlen = new IntByReference(inputBytes.length);
+			IntByReference inlen = new IntByReference(inputString.length());
 
-			Memory outbuf = new Memory(inputBytes.length * 2);
-			IntByReference outlen = new IntByReference(inputBytes.length * 2);
+			Memory outbuf = new Memory(inputBytes.length * 5);
+			IntByReference outlen = new IntByReference(inputBytes.length * 5);
 
 			int result = LibLouis.lou_translateString("en-ueb-g2.ctb", inbuf, inlen, outbuf, outlen, null, null, 0);
 

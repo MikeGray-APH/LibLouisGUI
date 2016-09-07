@@ -28,7 +28,6 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
@@ -93,7 +92,8 @@ public class Actions
 		item.setText("&Translate");
 		item.setMenu(menu);
 
-		new TranslateAction().addToMenuAndToolBar(menu, toolBar, "translate", 0, true);
+		new TranslateTextAction().addToMenuAndToolBar(menu, toolBar, "translate", 0, true);
+		new TranslateBrailleAction().addToMenuAndToolBar(menu, toolBar, "back translate", 0, true);
 	}
 
 	private final class SetLibLouisPathDialogAction extends BaseAction
@@ -224,12 +224,12 @@ public class Actions
 		}
 	}
 
-	private final class TranslateAction extends BaseAction
+	private final class TranslateTextAction extends BaseAction
 	{
 		@Override
 		public void widgetSelected(SelectionEvent ignored)
 		{
-			String inputString = textTranslate.getText();
+			String inputString = textTranslate.getTextText();
 			if(inputString.length() == 0)
 				return;
 
@@ -247,9 +247,34 @@ public class Actions
 				Message.messageError("UnsatisfiedLinkError", error, true);
 			}
 
-			MessageBox messageBox = new MessageBox(parentShell, SWT.ICON_INFORMATION | SWT.OK);
-			messageBox.setMessage(outputString);
-			messageBox.open();
+			textTranslate.setTextBraille(outputString);
+		}
+	}
+
+	private final class TranslateBrailleAction extends BaseAction
+	{
+		@Override
+		public void widgetSelected(SelectionEvent ignored)
+		{
+			String inputString = textTranslate.getTextBraille();
+			if(inputString.length() == 0)
+				return;
+
+			String outputString = null;
+			try
+			{
+				outputString = LibLouis.backTranslateString(settings.tableList, inputString, inputString.length() * 3, null, null, 0);
+			}
+			catch(UnsupportedEncodingException exception)
+			{
+				Message.messageError("UnsupportedEncodingException", exception, true);
+			}
+			catch(UnsatisfiedLinkError error)
+			{
+				Message.messageError("UnsatisfiedLinkError", error, true);
+			}
+
+			textTranslate.setTextText(outputString);
 		}
 	}
 

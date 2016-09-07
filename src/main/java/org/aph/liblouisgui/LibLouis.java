@@ -37,9 +37,11 @@ public class LibLouis
 
 	public static native int lou_translateString(String tables, Memory inbuf, IntByReference inlen, Memory outbuf, IntByReference outlen, short typeforms[], byte spacing[], int mode);
 
+	public static native int lou_backTranslateString(String tables, Memory inbuf, IntByReference inlen, Memory outbuf, IntByReference outlen, short typeforms[], byte spacing[], int mode);
+
 	public static String translateString(String tables, String inputString, int outputMax, short typeforms[], byte spacing[], int mode) throws UnsupportedEncodingException
 	{
-		byte inputBytes[] =  inputString.getBytes("UTF-16LE");
+		byte inputBytes[] = inputString.getBytes("UTF-16LE");
 
 		Memory inbuf = new Memory(inputBytes.length);
 		inbuf.write(0, inputBytes, 0, inputBytes.length);
@@ -49,6 +51,26 @@ public class LibLouis
 		IntByReference outlen = new IntByReference(outputMax * 2);
 
 		int result = lou_translateString(tables, inbuf, inlen, outbuf, outlen, null, null, 0);
+
+		int length = outlen.getValue();
+		byte outputBytes[] = outbuf.getByteArray(0, length * 2);
+		String outputString = new String(outputBytes, "UTF-16LE");
+
+		return outputString;
+	}
+
+	public static String backTranslateString(String tables, String inputString, int outputMax, short typeforms[], byte spacing[], int mode) throws UnsupportedEncodingException
+	{
+		byte inputBytes[] = inputString.getBytes("UTF-16LE");
+
+		Memory inbuf = new Memory(inputBytes.length);
+		inbuf.write(0, inputBytes, 0, inputBytes.length);
+		IntByReference inlen = new IntByReference(inputString.length());
+
+		Memory outbuf = new Memory(outputMax * 2);
+		IntByReference outlen = new IntByReference(outputMax * 2);
+
+		int result = lou_backTranslateString(tables, inbuf, inlen, outbuf, outlen, null, null, 0);
 
 		int length = outlen.getValue();
 		byte outputBytes[] = outbuf.getByteArray(0, length * 2);

@@ -45,7 +45,7 @@ public class Main
 		new Actions(shell, settings, textTranslate);
 
 		//   need to set size after everthing has been added
-		shell.setSize(320, 240);
+		shell.setSize(320, 480);
 		shell.open();
 		while(!shell.isDisposed())
 		if(!display.readAndDispatch())

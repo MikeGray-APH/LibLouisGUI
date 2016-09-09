@@ -95,6 +95,8 @@ public class Actions
 
 		new TranslateTextAction().addToMenuAndToolBar(menu, toolBar, "translate", 0, true);
 		new TranslateBrailleAction().addToMenuAndToolBar(menu, toolBar, "back translate", 0, true);
+		new ConvertToUnicode().addToMenuAndToolBar(menu, toolBar, "unicode", 0, true);
+		new ConvertToAscii().addToMenuAndToolBar(menu, toolBar, "ascii", 0, true);
 	}
 
 	private final class SetLibLouisPathDialogAction extends BaseAction
@@ -300,6 +302,38 @@ public class Actions
 			}
 
 			textTranslate.setTextLines(outputLines.toArray(new String[outputLines.size()]));
+		}
+	}
+
+	private final String asciiString =   " A1B'K2L@CIF/MSP\"E3H9O6R^DJG>NTQ,*5<-U8V.%[$+X!&;:4\\0Z7(_?W]#Y)=";
+
+	private final class ConvertToUnicode extends BaseAction
+	{
+		@Override
+		public void widgetSelected(SelectionEvent ignored)
+		{
+			char chars[] = textTranslate.getBraille().toUpperCase().toCharArray();
+
+			for(int i = 0; i < chars.length; i++)
+			if(chars[i] >= 0x20 && chars[i] <= 0x5f)
+				chars[i] = ((char)(0x2800 + asciiString.indexOf(chars[i])));
+
+			textTranslate.setBraille(new String(chars));
+		}
+	}
+
+	private final class ConvertToAscii extends BaseAction
+	{
+		@Override
+		public void widgetSelected(SelectionEvent ignored)
+		{
+			char chars[] = textTranslate.getBraille().toUpperCase().toCharArray();
+
+			for(int i = 0; i < chars.length; i++)
+			if(chars[i] >= 0x2800 && chars[i] <= 0x283f)
+				chars[i] = asciiString.charAt(chars[i] - 0x2800);
+
+			textTranslate.setBraille(new String(chars));
 		}
 	}
 

@@ -36,10 +36,18 @@ public class Main
 		Message.setShell(shell);
 
 		Settings settings = new Settings(null);
-		settings.readSettings();
-
-		LibLouis.loadLibrary(settings.libraryFileName);
-		LibLouis.lou_setDataPath(settings.tablePath);
+		if(settings.readSettings())
+		{
+			try
+			{
+				LibLouis.loadLibrary(settings.libraryFileName);
+				LibLouis.lou_setDataPath(settings.tablePath);
+			}
+			catch(UnsatisfiedLinkError error)
+			{
+				Message.messageError("Invalid liblouis library:  " + settings.libraryFileName, error, true);
+			}
+		}
 
 		TextTranslate textTranslate = new TextTranslate(shell);
 		new Actions(shell, settings, textTranslate);

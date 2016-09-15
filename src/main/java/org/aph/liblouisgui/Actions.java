@@ -110,8 +110,17 @@ public class Actions
 			if(fileName == null)
 				return;
 
+			try
+			{
+				LibLouis.loadLibrary(fileName);
+			}
+			catch(UnsatisfiedLinkError error)
+			{
+				Message.messageError("Invalid liblouis library:  " + settings.libraryFileName, error, true);
+				return;
+			}
+
 			settings.libraryFileName = fileName;
-			LibLouis.loadLibrary(fileName);
 		}
 	}
 
@@ -126,7 +135,15 @@ public class Actions
 				return;
 
 			settings.tablePath = directoryName;
-			LibLouis.lou_setDataPath(directoryName);
+			try
+			{
+				LibLouis.lou_setDataPath(directoryName);
+			}
+			catch(UnsatisfiedLinkError error)
+			{
+				Message.messageError("Invalid liblouis library:  " + settings.libraryFileName, error, true);
+				return;
+			}
 		}
 	}
 
@@ -254,10 +271,12 @@ public class Actions
 				catch(UnsupportedEncodingException exception)
 				{
 					Message.messageError("UnsupportedEncodingException", exception, true);
+					return;
 				}
 				catch(UnsatisfiedLinkError error)
 				{
-					Message.messageError("UnsatisfiedLinkError", error, true);
+					Message.messageError("Invalid liblouis library:  " + settings.libraryFileName, error, true);
+					return;
 				}
 				outputLines.add(outputLine);
 			}
@@ -293,10 +312,12 @@ public class Actions
 				catch(UnsupportedEncodingException exception)
 				{
 					Message.messageError("UnsupportedEncodingException", exception, true);
+					return;
 				}
 				catch(UnsatisfiedLinkError error)
 				{
-					Message.messageError("UnsatisfiedLinkError", error, true);
+					Message.messageError("Invalid liblouis library:  " + settings.libraryFileName, error, true);
+					return;
 				}
 				outputLines.add(outputLine);
 			}

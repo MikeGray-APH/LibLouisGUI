@@ -17,6 +17,7 @@ package org.aph.liblouisgui;
 
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 public class Main
@@ -50,7 +51,10 @@ public class Main
 		}
 
 		TextTranslate textTranslate = new TextTranslate(shell);
-		new Actions(shell, settings, textTranslate);
+
+		Label tableListLabel = new Label(shell, 0);
+
+		new Actions(shell, settings, textTranslate, tableListLabel);
 
 		//   need to set size after everthing has been added
 		shell.setSize(320, 480);

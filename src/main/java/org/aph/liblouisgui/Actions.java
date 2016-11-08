@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
@@ -41,12 +42,16 @@ public class Actions
 	private final Shell parentShell;
 	private final Settings settings;
 	private final TextTranslate textTranslate;
+	private final Label tableListLabel;
 
-	public Actions(Shell parentShell, Settings settings, TextTranslate textTranslate)
+	public Actions(Shell parentShell, Settings settings, TextTranslate textTranslate, Label tableListLabel)
 	{
 		this.parentShell = parentShell;
 		this.settings = settings;
 		this.textTranslate = textTranslate;
+		this.tableListLabel = tableListLabel;
+
+		tableListLabel.setText("Tables:  " + settings.tableList);
 
 		Menu menuBar = new Menu(parentShell, SWT.BAR);
 		parentShell.setMenuBar(menuBar);
@@ -197,6 +202,7 @@ public class Actions
 		{
 			if(event.widget == okButton)
 				settings.tableList = text.getText();
+			tableListLabel.setText("Tables:  " + settings.tableList);
 			shell.dispose();
 		}
 
@@ -209,6 +215,7 @@ public class Actions
 			if(event.keyCode == '\r' || event.keyCode == '\n')
 			{
 				settings.tableList = text.getText();
+				tableListLabel.setText("Tables:  " + settings.tableList);
 				shell.dispose();
 			}
 		}

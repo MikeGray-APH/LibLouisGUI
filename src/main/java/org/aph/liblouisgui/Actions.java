@@ -79,7 +79,8 @@ public class Actions
 
 		new SetLibLouisPathDialogAction().addToMenu(menu, "Set LibLouis Path", 0, true);
 		new SetTablePathDialogAction().addToMenu(menu, "Set Table Path", 0, true);
-		new SetTableListAction().addToMenu(menu, "Set tables", 0, true);
+		new EditTablePathAction().addToMenu(menu, "Edit Table Path", 0, true);
+		new EditTableListAction().addToMenu(menu, "Edit Tables", 0, true);
 
 		//   edit menu
 		menu = new Menu(menuBar);
@@ -99,7 +100,7 @@ public class Actions
 		item.setMenu(menu);
 
 		new TranslateTextAction().addToMenuAndToolBar(menu, toolBar, "translate", 0, true);
-		new TranslateBrailleAction().addToMenuAndToolBar(menu, toolBar, "back translate", 0, true);
+		new TranslateBrailleAction().addToMenuAndToolBar(menu, toolBar, "back-translate", 0, true);
 		new ConvertToUnicode().addToMenuAndToolBar(menu, toolBar, "unicode", 0, true);
 		new ConvertToAscii().addToMenuAndToolBar(menu, toolBar, "ascii", 0, true);
 	}
@@ -152,23 +153,107 @@ public class Actions
 		}
 	}
 
-	private final class SetTableListAction extends BaseAction
+	private final class EditTablePathAction extends BaseAction
 	{
 		@Override
 		public void widgetSelected(SelectionEvent ignored)
 		{
-			new SetTableListDialog();
+			new EditTablePathDialog();
 		}
 	}
 
-	private final class SetTableListDialog implements SelectionListener, KeyListener
+	private final class EditTablePathDialog implements SelectionListener, KeyListener
 	{
 		private final Shell shell;
 		private final Text text;
 		private final Button okButton;
 		private final Button cancelButton;
 
-		private SetTableListDialog()
+		private EditTablePathDialog()
+		{
+			shell = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
+			shell.setText("tables");
+			shell.setLayout(new GridLayout(1, true));
+
+			text = new Text(shell, SWT.SINGLE | SWT.LEFT);
+			text.setText(settings.tablePath);
+			text.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1));
+			text.addKeyListener(this);
+
+			Composite composite = new Composite(shell, 0);
+			composite.setLayout(new GridLayout(2, true));
+			composite.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, true));
+
+			okButton = new Button(composite, SWT.PUSH);
+			okButton.setText("OK");
+			okButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+			okButton.addSelectionListener(this);
+
+			cancelButton = new Button(composite, SWT.PUSH);
+			cancelButton.setText("Cancel");
+			cancelButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+			cancelButton.addSelectionListener(this);
+
+			shell.pack();
+			shell.open();
+		}
+
+		private void setTablePath(String tablePath)
+		{
+			settings.tablePath = tablePath;
+			try
+			{
+				LibLouis.lou_setDataPath(tablePath);
+			}
+			catch(UnsatisfiedLinkError error)
+			{
+				Message.messageError("Invalid liblouis library:  " + settings.libraryFileName, error, true);
+				return;
+			}
+		}
+
+		@Override
+		public void widgetSelected(SelectionEvent event)
+		{
+			if(event.widget == okButton)
+				setTablePath(text.getText());
+			shell.dispose();
+		}
+
+		@Override
+		public void widgetDefaultSelected(SelectionEvent ignored){}
+
+		@Override
+		public void keyPressed(KeyEvent event)
+		{
+			if(event.keyCode == '\r' || event.keyCode == '\n')
+			{
+				setTablePath(text.getText());
+				shell.dispose();
+			}
+		}
+
+		@Override
+		public void keyReleased(KeyEvent ignored){}
+	}
+
+	private final class EditTableListAction extends BaseAction
+	{
+		@Override
+		public void widgetSelected(SelectionEvent ignored)
+		{
+			new EditTableListDialog();
+		}
+	}
+
+	private final class EditTableListDialog implements SelectionListener, KeyListener
+	{
+		private final Shell shell;
+		private final Text text;
+		private final Button okButton;
+		private final Button cancelButton;
+
+		private EditTableListDialog()
 		{
 			shell = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
 			shell.setText("tables");

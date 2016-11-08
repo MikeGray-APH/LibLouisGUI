@@ -24,7 +24,7 @@ import java.io.PrintWriter;
 
 public class Settings
 {
-	String settingsVersion = "", libraryFileName = "", tablePath = "", tableList = "";
+	String settingsVersion, libraryFileName, tablePath, tableList;
 
 	private final File file;
 
@@ -126,9 +126,12 @@ public class Settings
 			version = "?";
 		writer.println("version " + version);
 
-		writer.println("library.fileName " + libraryFileName);
+		if(libraryFileName != null)
+			writer.println("library.fileName " + libraryFileName);
+		if(tablePath != null)
 		writer.println("table.path " + tablePath);
-		writer.println("table.list " + tableList);
+		if(tableList != null)
+			writer.println("table.list " + tableList);
 
 		writer.println();
 	}

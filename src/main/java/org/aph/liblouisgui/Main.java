@@ -36,7 +36,7 @@ public class Main
 		Message.setShell(shell);
 
 		Settings settings = new Settings(null);
-		if(settings.readSettings())
+		if(settings.readSettings() && settings.libraryFileName != null && settings.tablePath != null)
 		{
 			try
 			{

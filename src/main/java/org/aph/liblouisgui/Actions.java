@@ -20,6 +20,8 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -103,6 +105,14 @@ public class Actions
 		new TranslateBrailleAction().addToMenuAndToolBar(menu, toolBar, "back-translate", 0, true);
 		new ConvertToUnicode().addToMenuAndToolBar(menu, toolBar, "unicode", 0, true);
 		new ConvertToAscii().addToMenuAndToolBar(menu, toolBar, "ascii", 0, true);
+
+		//   about menu
+		menu = new Menu(menuBar);
+		item = new MenuItem(menuBar, SWT.CASCADE);
+		item.setText("Help");
+		item.setMenu(menu);
+
+		new AboutHandler().addToMenu(menu, "About", 0, true);
 	}
 
 	private final class SetLibLouisPathDialogAction extends BaseAction
@@ -447,6 +457,60 @@ public class Actions
 				chars[i] = asciiString.charAt(chars[i] - 0x2800);
 
 			textTranslate.setBraille(new String(chars));
+		}
+	}
+
+	private final class AboutHandler extends BaseAction
+	{
+		@Override
+		public void widgetSelected(SelectionEvent ignored)
+		{
+			new AboutDialog(parentShell);
+		}
+	}
+
+	private final class AboutDialog
+	{
+		private AboutDialog(Shell parentShell)
+		{
+			Shell dialog = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.PRIMARY_MODAL);
+			dialog.setLayout(new GridLayout(1, true));
+			dialog.setText("About BrailleZephyr");
+
+			String versionString = settings.version;
+			if(versionString == null)
+				versionString = "dev";
+
+			Label label;
+
+			Image image = new Image(parentShell.getDisplay(), getClass().getResourceAsStream("/images/LibLouisGUI-logo-250x65.png"));
+			label = new Label(dialog, SWT.CENTER);
+			label.setLayoutData(new GridData(GridData.FILL_BOTH));
+			label.setImage(image);
+
+			new Label(dialog, SWT.SEPARATOR | SWT.HORIZONTAL).setLayoutData(new GridData(GridData.FILL_BOTH));
+
+			label = new Label(dialog, SWT.CENTER);
+			label.setLayoutData(new GridData(GridData.FILL_BOTH));
+			label.setFont(new Font(parentShell.getDisplay(), "Sans", 14, SWT.BOLD));
+			label.setText("LibLouisGUI " + versionString);
+
+			label = new Label(dialog, SWT.CENTER);
+			label.setLayoutData(new GridData(GridData.FILL_BOTH));
+			label.setFont(new Font(parentShell.getDisplay(), "Sans", 10, SWT.NORMAL));
+			label.setText("Copyright © 2016 American Printing House for the Blind Inc.");
+
+			//TODO:  LibLouis copyright?
+//			label = new Label(dialog, SWT.CENTER);
+//			label.setLayoutData(new GridData(GridData.FILL_BOTH));
+//			label.setFont(new Font(parentShell.getDisplay(), "Sans", 10, SWT.NORMAL));
+//			label.setText("Copyright © 2016 American Printing House for the Blind Inc.");
+
+			dialog.pack();
+			dialog.open();
+			while(!dialog.isDisposed())
+				if(!dialog.getDisplay().readAndDispatch())
+					dialog.getDisplay().sleep();
 		}
 	}
 

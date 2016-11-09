@@ -24,7 +24,7 @@ import java.io.PrintWriter;
 
 public class Settings
 {
-	String settingsVersion, libraryFileName, tablePath, tableList;
+	String version, libraryFileName, tablePath, tableList;
 
 	private final File file;
 
@@ -52,7 +52,7 @@ public class Settings
 		String tokens[];
 		switch(line.substring(0, offset))
 		{
-		case "version":  settingsVersion = value;  break;
+		case "version":  version = value;  break;
 
 		case "library.fileName":  libraryFileName = value;  break;
 		case "table.path":        tablePath = value;        break;

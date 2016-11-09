@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+plugins {
+	id 'edu.sc.seis.launch4j' version '1.6.2'
+}
+
 apply plugin: 'java'
 apply plugin: 'application'
 
@@ -157,6 +161,24 @@ task allJars {
 	dependsOn win64Jar
 	dependsOn macxJar
 }
+
+
+task copyIcon(type: Copy) {
+	from 'LibLouisGUI.ico'
+	into 'build/launch4j'
+}
+
+afterEvaluate {
+	copyL4jLib.dependsOn copyIcon
+}
+
+launch4j {
+	mainClassName = project.mainClassName
+	icon = 'LibLouisGUI.ico'
+	copyConfigurable = project.tasks.win64Jar.outputs.files
+	jar = "lib/${project.tasks.win64Jar.archiveName}"
+}
+
 
 task wrapper(type: Wrapper) {
 	gradleVersion = '3.0'

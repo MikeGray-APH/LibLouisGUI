@@ -20,15 +20,22 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 public class Main
 {
+	private final Display display;
 	private final Shell shell;
 
 	public Main(String args[])
 	{
 		Display.setAppName("LibLouisGUI");
 
-		Display display = Display.getDefault();
+		display = Display.getDefault();
 
 		shell = new Shell(display);
 		shell.setLayout(new GridLayout(1, true));
@@ -36,7 +43,21 @@ public class Main
 
 		Message.setShell(shell);
 
-		Settings settings = new Settings(null);
+		//   load fonts
+		loadFont("BrailleZephyr_6.otf");
+		loadFont("BrailleZephyr_6b.otf");
+		loadFont("BrailleZephyr_6s.otf");
+		loadFont("BrailleZephyr_6sb.otf");
+		loadFont("BrailleZephyr_8.otf");
+		loadFont("BrailleZephyr_8b.otf");
+		loadFont("BrailleZephyr_8s.otf");
+		loadFont("BrailleZephyr_8sb.otf");
+		loadFont("BrailleZephyr_8w.otf");
+		loadFont("BrailleZephyr_8wb.otf");
+		loadFont("BrailleZephyr_8ws.otf");
+		loadFont("BrailleZephyr_8wsb.otf");
+
+		Settings settings = new Settings(display, null);
 		if(settings.readSettings() && settings.libraryFileName != null && settings.tablePath != null)
 		{
 			try
@@ -66,6 +87,34 @@ public class Main
 		display.dispose();
 
 		settings.writeSettings();
+	}
+
+	private void loadFont(String fontFileName)
+	{
+		try
+		{
+			InputStream fontInputStream = getClass().getResourceAsStream("/fonts/" + fontFileName);
+			if(fontInputStream == null)
+				return;
+			File fontFile = new File(System.getProperty("java.io.tmpdir") + File.separator + fontFileName);
+			FileOutputStream fontOutputStream = new FileOutputStream(fontFile);
+			byte buffer[] = new byte[27720];
+			int length;
+			while((length = fontInputStream.read(buffer)) > 0)
+				fontOutputStream.write(buffer, 0, length);
+			fontInputStream.close();
+			fontOutputStream.close();
+
+			display.loadFont(fontFile.getPath());
+		}
+		catch(FileNotFoundException exception)
+		{
+			Message.messageError("ERROR:  Unable to open font file:  " + exception.getMessage());
+		}
+		catch(IOException exception)
+		{
+			Message.messageError("ERROR:  Unable to read font file:  " + exception.getMessage());
+		}
 	}
 
 	public static void main(String args[])

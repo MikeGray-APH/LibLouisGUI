@@ -21,6 +21,7 @@ import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -28,6 +29,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.FontDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -55,6 +57,11 @@ public class Actions
 
 		tableListLabel.setText("Tables:  " + settings.tableList);
 
+		if(settings.textFont != null)
+			textTranslate.setTextFont(settings.textFont);
+		if(settings.brailleFont != null)
+			textTranslate.setBrailleFont(settings.brailleFont);
+
 		Menu menuBar = new Menu(parentShell, SWT.BAR);
 		parentShell.setMenuBar(menuBar);
 
@@ -76,13 +83,16 @@ public class Actions
 		//   LibLouis menu
 		menu = new Menu(menuBar);
 		item = new MenuItem(menuBar, SWT.CASCADE);
-		item.setText("&LibLouis");
+		item.setText("&Settings");
 		item.setMenu(menu);
 
 		new SetLibLouisPathDialogAction().addToMenu(menu, "Set LibLouis Path", 0, true);
 		new SetTablePathDialogAction().addToMenu(menu, "Set Table Path", 0, true);
 		new EditTablePathAction().addToMenu(menu, "Edit Table Path", 0, true);
 		new EditTableListAction().addToMenu(menu, "Edit Tables", 0, true);
+		new MenuItem(menu, SWT.SEPARATOR);
+		new TextFontHandler().addToMenu(menu, "Text Font", 0, true);
+		new BrailleFontHandler().addToMenu(menu, "Braille Font", 0, true);
 
 		//   edit menu
 		menu = new Menu(menuBar);
@@ -317,6 +327,36 @@ public class Actions
 
 		@Override
 		public void keyReleased(KeyEvent ignored){}
+	}
+
+	private class TextFontHandler extends BaseAction
+	{
+		@Override
+		public void widgetSelected(SelectionEvent ignored)
+		{
+			FontDialog fontDialog = new FontDialog(parentShell, SWT.OPEN);
+			fontDialog.setFontList(textTranslate.getTextFont().getFontData());
+			FontData fontData = fontDialog.open();
+			if(fontData == null)
+				return;
+			settings.textFont = new Font(parentShell.getDisplay(), fontData);
+			textTranslate.setTextFont(settings.textFont);
+		}
+	}
+
+	private class BrailleFontHandler extends BaseAction
+	{
+		@Override
+		public void widgetSelected(SelectionEvent ignored)
+		{
+			FontDialog fontDialog = new FontDialog(parentShell, SWT.OPEN);
+			fontDialog.setFontList(textTranslate.getBrailleFont().getFontData());
+			FontData fontData = fontDialog.open();
+			if(fontData == null)
+				return;
+			settings.brailleFont = new Font(parentShell.getDisplay(), fontData);
+			textTranslate.setBrailleFont(settings.brailleFont);
+		}
 	}
 
 	private class CutAction extends BaseAction

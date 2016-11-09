@@ -15,6 +15,10 @@
 
 package org.aph.liblouisgui;
 
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.widgets.Display;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -25,15 +29,18 @@ import java.io.PrintWriter;
 public class Settings
 {
 	String version, libraryFileName, tablePath, tableList;
+	Font textFont, brailleFont;
 
+	private final Display display;
 	private final File file;
 
-	public Settings(String fileName)
+	public Settings(Display display, String fileName)
 	{
+		this.display = display;
+
 		if(fileName == null)
 			fileName = System.getProperty("user.home") + File.separator + ".liblouisgui.conf";
 		file = new File(fileName);
-		readSettings();
 	}
 
 	private boolean readLine(String line)
@@ -57,6 +64,36 @@ public class Settings
 		case "library.fileName":  libraryFileName = value;  break;
 		case "table.path":        tablePath = value;        break;
 		case "table.list":        tableList = value;        break;
+
+		case "text.font":
+
+			//   find offset for fileName
+			offset = value.indexOf(' ') + 1;
+			if(offset < 1 || offset == value.length())
+				return false;
+			offset = value.indexOf(' ', offset) + 1;
+			if(offset < 1 || offset == value.length())
+				return false;
+			tokens = value.split(" ");
+			if(tokens.length < 3)
+				return false;
+			textFont = new Font(display, value.substring(offset), Integer.parseInt(tokens[0]), Integer.parseInt(tokens[1]));
+			break;
+
+		case "braille.font":
+
+			//   find offset for fileName
+			offset = value.indexOf(' ') + 1;
+			if(offset < 1 || offset == value.length())
+				return false;
+			offset = value.indexOf(' ', offset) + 1;
+			if(offset < 1 || offset == value.length())
+				return false;
+			tokens = value.split(" ");
+			if(tokens.length < 3)
+				return false;
+			brailleFont = new Font(display, value.substring(offset), Integer.parseInt(tokens[0]), Integer.parseInt(tokens[1]));
+			break;
 
 		default:  return false;
 		}
@@ -132,6 +169,24 @@ public class Settings
 		writer.println("table.path " + tablePath);
 		if(tableList != null)
 			writer.println("table.list " + tableList);
+
+		if(textFont != null)
+		{
+			FontData fontData = textFont.getFontData()[0];
+			writer.println("text.font "
+			               + fontData.getHeight() + ' '
+			               + fontData.getStyle() + ' '
+			               + fontData.getName());
+		}
+
+		if(brailleFont != null)
+		{
+			FontData fontData = brailleFont.getFontData()[0];
+			writer.println("braille.font "
+			               + fontData.getHeight() + ' '
+			               + fontData.getStyle() + ' '
+			               + fontData.getName());
+		}
 
 		writer.println();
 	}

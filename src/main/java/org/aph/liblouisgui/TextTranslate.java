@@ -19,6 +19,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -96,6 +97,16 @@ public class TextTranslate
 		textText.setText(stringBuilder.toString());
 	}
 
+	public Font getTextFont()
+	{
+		return textText.getFont();
+	}
+
+	public void setTextFont(Font font)
+	{
+		textText.setFont(font);
+	}
+
 	public String getBraille()
 	{
 		return textBraille.getText();
@@ -126,6 +137,16 @@ public class TextTranslate
 		}
 
 		textBraille.setText(stringBuilder.toString());
+	}
+
+	public Font getBrailleFont()
+	{
+		return textBraille.getFont();
+	}
+
+	public void setBrailleFont(Font font)
+	{
+		textBraille.setFont(font);
 	}
 
 	private final class FocusHandler implements FocusListener

@@ -55,7 +55,11 @@ public class Actions
 		this.textTranslate = textTranslate;
 		this.tableListLabel = tableListLabel;
 
-		tableListLabel.setText("Tables:  " + settings.tableList);
+		if(settings.tableList != null)
+			tableListLabel.setText("Tables:  " + settings.tableList);
+		else
+			tableListLabel.setText("Tables:");
+
 
 		if(settings.textFont != null)
 			textTranslate.setTextFont(settings.textFont);
@@ -139,10 +143,11 @@ public class Actions
 			try
 			{
 				LibLouis.loadLibrary(fileName);
+				settings.libraryFileName = fileName;
 			}
 			catch(UnsatisfiedLinkError error)
 			{
-				Message.messageError("Invalid liblouis library:  " + settings.libraryFileName, error, true);
+				Message.messageError("Invalid liblouis library:  " + fileName, error, true);
 				return;
 			}
 
@@ -280,7 +285,8 @@ public class Actions
 			shell.setLayout(new GridLayout(1, true));
 
 			text = new Text(shell, SWT.SINGLE | SWT.LEFT);
-			text.setText(settings.tableList);
+			if(settings.tableList != null)
+				text.setText(settings.tableList);
 			text.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1));
 			text.addKeyListener(this);
 
@@ -305,9 +311,11 @@ public class Actions
 		@Override
 		public void widgetSelected(SelectionEvent event)
 		{
-			if(event.widget == okButton)
+			if(event.widget == okButton) {
 				settings.tableList = text.getText();
-			tableListLabel.setText("Tables:  " + settings.tableList);
+				tableListLabel.setText("Tables:  " + settings.tableList);
+				parentShell.layout();
+			}
 			shell.dispose();
 		}
 
@@ -321,6 +329,7 @@ public class Actions
 			{
 				settings.tableList = text.getText();
 				tableListLabel.setText("Tables:  " + settings.tableList);
+				parentShell.layout();
 				shell.dispose();
 			}
 		}

@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
@@ -152,6 +153,12 @@ public class Actions
 			if(fileName == null)
 				return;
 
+			if(!new File(fileName).exists())
+			{
+				Message.messageError("Liblouis library does not exist:  " + fileName, true);
+				return;
+			}
+
 			try
 			{
 				LibLouis.loadLibrary(fileName);
@@ -178,10 +185,10 @@ public class Actions
 			if(directoryName == null)
 				return;
 
-			settings.tablePath = directoryName;
 			try
 			{
 				LibLouis.lou_setDataPath(directoryName);
+				settings.tablePath = directoryName;
 				setTableListLabelToolTip();
 			}
 			catch(UnsatisfiedLinkError error)
@@ -239,10 +246,11 @@ public class Actions
 
 		private void setTablePath(String tablePath)
 		{
-			settings.tablePath = tablePath;
 			try
 			{
 				LibLouis.lou_setDataPath(tablePath);
+				settings.tablePath = tablePath;
+				setTableListLabelToolTip();
 			}
 			catch(UnsatisfiedLinkError error)
 			{
@@ -414,6 +422,12 @@ public class Actions
 		@Override
 		public void widgetSelected(SelectionEvent ignored)
 		{
+			if(!new File(settings.libraryFileName).exists())
+			{
+				Message.messageError("Liblouis library does not exist:  " + settings.libraryFileName, true);
+				return;
+			}
+
 			String inputLines[] = textTranslate.getTextLines();
 			if(inputLines.length == 0)
 				return;
@@ -443,7 +457,18 @@ public class Actions
 					Message.messageError("Invalid liblouis library:  " + settings.libraryFileName, error, true);
 					return;
 				}
-				outputLines.add(outputLine);
+				catch(Exception exception)
+				{
+					Message.messageError("Exception", exception, true);
+				}
+				catch(Error error)
+				{
+					Message.messageError("Error", error, true);
+				}
+				if(outputLine == null)
+					Message.messageError("Translation error for:  " + inputLine, true);
+				else
+					outputLines.add(outputLine);
 			}
 
 			textTranslate.setBrailleLines(outputLines.toArray(new String[outputLines.size()]));
@@ -455,6 +480,12 @@ public class Actions
 		@Override
 		public void widgetSelected(SelectionEvent ignored)
 		{
+			if(!new File(settings.libraryFileName).exists())
+			{
+				Message.messageError("Liblouis library does not exist:  " + settings.libraryFileName, true);
+				return;
+			}
+
 			String inputLines[] = textTranslate.getBrailleLines();
 			if(inputLines.length == 0)
 				return;
@@ -484,7 +515,18 @@ public class Actions
 					Message.messageError("Invalid liblouis library:  " + settings.libraryFileName, error, true);
 					return;
 				}
-				outputLines.add(outputLine);
+				catch(Exception exception)
+				{
+					Message.messageError("Exception", exception, true);
+				}
+				catch(Error error)
+				{
+					Message.messageError("Error", error, true);
+				}
+				if(outputLine == null)
+					Message.messageError("Translation error for:  " + inputLine, true);
+				else
+					outputLines.add(outputLine);
 			}
 
 			textTranslate.setTextLines(outputLines.toArray(new String[outputLines.size()]));

@@ -52,6 +52,9 @@ public class LibLouis
 
 		int result = lou_translateString(tables, inbuf, inlen, outbuf, outlen, null, null, 0);
 
+		if(result == 0)
+			return null;
+
 		int length = outlen.getValue();
 		byte outputBytes[] = outbuf.getByteArray(0, length * 2);
 		String outputString = new String(outputBytes, "UTF-16LE");

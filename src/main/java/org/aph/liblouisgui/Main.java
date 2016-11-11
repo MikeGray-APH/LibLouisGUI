@@ -60,15 +60,20 @@ public class Main
 		Settings settings = new Settings(display, null);
 		if(settings.readSettings() && settings.libraryFileName != null && settings.tablePath != null)
 		{
-			try
+			if(new File(settings.libraryFileName).exists())
 			{
-				LibLouis.loadLibrary(settings.libraryFileName);
-				LibLouis.lou_setDataPath(settings.tablePath);
+				try
+				{
+					LibLouis.loadLibrary(settings.libraryFileName);
+					LibLouis.lou_setDataPath(settings.tablePath);
+				}
+				catch(UnsatisfiedLinkError error)
+				{
+					Message.messageError("Invalid liblouis library:  " + settings.libraryFileName, error, true);
+				}
 			}
-			catch(UnsatisfiedLinkError error)
-			{
-				Message.messageError("Invalid liblouis library:  " + settings.libraryFileName, error, true);
-			}
+			else
+				Message.messageError("Liblouis library does not exist:  " + settings.libraryFileName, true);
 		}
 
 		TextTranslate textTranslate = new TextTranslate(shell);

@@ -159,9 +159,8 @@ public class Settings
 	private void writeLines(PrintWriter writer)
 	{
 		String version = System.getProperty("liblouisgui.version");
-		if(version == null)
-			version = "?";
-		writer.println("version " + version);
+		if(version != null)
+			writer.println("version " + version);
 
 		if(libraryFileName != null)
 			writer.println("library.fileName " + libraryFileName);

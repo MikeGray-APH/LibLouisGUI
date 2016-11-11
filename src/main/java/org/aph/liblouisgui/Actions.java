@@ -59,7 +59,7 @@ public class Actions
 			tableListLabel.setText("Tables:  " + settings.tableList);
 		else
 			tableListLabel.setText("Tables:");
-
+		setTableListLabelToolTip();
 
 		if(settings.textFont != null)
 			textTranslate.setTextFont(settings.textFont);
@@ -90,7 +90,7 @@ public class Actions
 		item.setText("&Settings");
 		item.setMenu(menu);
 
-		new SetLibLouisPathDialogAction().addToMenu(menu, "Set LibLouis Path", 0, true);
+		new SetLibraryPathDialogAction().addToMenu(menu, "Set LibLouis Path", 0, true);
 		new SetTablePathDialogAction().addToMenu(menu, "Set Table Path", 0, true);
 		new EditTablePathAction().addToMenu(menu, "Edit Table Path", 0, true);
 		new EditTableListAction().addToMenu(menu, "Edit Tables", 0, true);
@@ -129,7 +129,19 @@ public class Actions
 		new AboutHandler().addToMenu(menu, "About", 0, true);
 	}
 
-	private final class SetLibLouisPathDialogAction extends BaseAction
+	private void setTableListLabelToolTip()
+	{
+		StringBuilder toolTipString = new StringBuilder();
+		toolTipString.append("Library:");
+		if(settings.libraryFileName != null)
+			toolTipString.append("  " + settings.libraryFileName);
+		toolTipString.append(System.getProperty("line.separator") + "Tables Path:");
+		if(settings.tablePath != null)
+			toolTipString.append("  " + settings.tablePath);
+		tableListLabel.setToolTipText(toolTipString.toString());
+	}
+
+	private final class SetLibraryPathDialogAction extends BaseAction
 	{
 		@Override
 		public void widgetSelected(SelectionEvent ignored)
@@ -144,6 +156,7 @@ public class Actions
 			{
 				LibLouis.loadLibrary(fileName);
 				settings.libraryFileName = fileName;
+				setTableListLabelToolTip();
 			}
 			catch(UnsatisfiedLinkError error)
 			{
@@ -169,6 +182,7 @@ public class Actions
 			try
 			{
 				LibLouis.lou_setDataPath(directoryName);
+				setTableListLabelToolTip();
 			}
 			catch(UnsatisfiedLinkError error)
 			{
@@ -602,8 +616,10 @@ public class Actions
 		void setEnabled(boolean enabled)
 		{
 			this.enabled = enabled;
-			menuItem.setEnabled(enabled);
-			toolItem.setEnabled(enabled);
+			if(menuItem != null)
+				menuItem.setEnabled(enabled);
+			if(toolItem != null)
+				toolItem.setEnabled(enabled);
 		}
 
 		boolean isEnabled()

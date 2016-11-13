@@ -422,11 +422,8 @@ public class Actions
 		@Override
 		public void widgetSelected(SelectionEvent ignored)
 		{
-			if(!new File(settings.libraryFileName).exists())
-			{
-				Message.messageError("Liblouis library does not exist:  " + settings.libraryFileName, true);
+			if(!settings.areLibraryFilesValid(true))
 				return;
-			}
 
 			String inputLines[] = textTranslate.getTextLines();
 			if(inputLines.length == 0)
@@ -480,11 +477,8 @@ public class Actions
 		@Override
 		public void widgetSelected(SelectionEvent ignored)
 		{
-			if(!new File(settings.libraryFileName).exists())
-			{
-				Message.messageError("Liblouis library does not exist:  " + settings.libraryFileName, true);
+			if(!settings.areLibraryFilesValid(true))
 				return;
-			}
 
 			String inputLines[] = textTranslate.getBrailleLines();
 			if(inputLines.length == 0)

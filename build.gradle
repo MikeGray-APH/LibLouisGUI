@@ -27,8 +27,9 @@ group = 'org.aph.liblouisgui'
 version = '0.1'
 mainClassName = 'org.aph.liblouisgui.Main'
 
-sourceCompatibility = '1.7'
-targetCompatibility = '1.7'
+compileJava {
+	options.encoding = 'UTF-8'
+}
 
 String swtJar
 switch(System.getProperty('os.name').toLowerCase().split()[0])

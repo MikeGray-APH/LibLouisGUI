@@ -58,9 +58,9 @@ public class Main
 		loadFont("BrailleZephyr_8wsb.otf");
 
 		Settings settings = new Settings(display, null);
-		if(settings.readSettings() && settings.libraryFileName != null && settings.tablePath != null)
+		if(settings.readSettings())
 		{
-			if(new File(settings.libraryFileName).exists())
+			if(settings.areLibraryFilesValid(false))
 			{
 				try
 				{
@@ -72,8 +72,6 @@ public class Main
 					Message.messageError("Invalid liblouis library:  " + settings.libraryFileName, error, true);
 				}
 			}
-			else
-				Message.messageError("Liblouis library does not exist:  " + settings.libraryFileName, true);
 		}
 
 		TextTranslate textTranslate = new TextTranslate(shell);

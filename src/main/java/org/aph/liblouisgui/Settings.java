@@ -222,4 +222,38 @@ public class Settings
 
 		return true;
 	}
+
+	boolean areLibraryFilesValid(boolean outMessage)
+	{
+		if(libraryFileName == null)
+		{
+			if(outMessage)
+				Message.messageError("Liblouis library not set", true);
+			return false;
+		}
+
+		if(!new File(libraryFileName).exists())
+		{
+			if(outMessage)
+				Message.messageError("Liblouis library does not exist:  " + libraryFileName, true);
+			return false;
+		}
+
+		//TODO:  some libraries don't need it
+//		if(tablePath == null)
+//		{
+//			if(outMessage)
+//				Message.messageError("Table path not set", true);
+//			return false;
+//		}
+
+		if(tableList == null)
+		{
+			if(outMessage)
+				Message.messageError("Tables not set", true);
+			return false;
+		}
+
+		return true;
+	}
 }

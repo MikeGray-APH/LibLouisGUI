@@ -49,6 +49,8 @@ public class Actions
 	private final TextTranslate textTranslate;
 	private final Label tableListLabel;
 
+	private boolean usingAPH = false;
+
 	public Actions(Shell parentShell, Settings settings, TextTranslate textTranslate, Label tableListLabel)
 	{
 		this.parentShell = parentShell;
@@ -56,8 +58,8 @@ public class Actions
 		this.textTranslate = textTranslate;
 		this.tableListLabel = tableListLabel;
 
-		if(settings.tableList != null)
-			tableListLabel.setText("Tables:  " + settings.tableList);
+		if(settings.louTableList != null)
+			tableListLabel.setText("Tables:  " + settings.louTableList);
 		else
 			tableListLabel.setText("Tables:");
 		setTableListLabelToolTip();
@@ -91,6 +93,8 @@ public class Actions
 		item.setText("&Settings");
 		item.setMenu(menu);
 
+		new UsingAPHHandler().addToMenu(menu, "use LibLouisAPH", 0, true);
+		new MenuItem(menu, SWT.SEPARATOR);
 		new SetLibraryPathDialogAction().addToMenu(menu, "Set LibLouis Path", 0, true);
 		new SetTablePathDialogAction().addToMenu(menu, "Set Table Path", 0, true);
 		new EditTablePathAction().addToMenu(menu, "Edit Table Path", 0, true);
@@ -134,12 +138,54 @@ public class Actions
 	{
 		StringBuilder toolTipString = new StringBuilder();
 		toolTipString.append("Library:");
-		if(settings.libraryFileName != null)
-			toolTipString.append("  " + settings.libraryFileName);
+		if(usingAPH)
+		{
+			if(settings.aphLibraryFileName != null)
+				toolTipString.append("  " + settings.aphLibraryFileName);
+		}
+		else
+		{
+			if(settings.louLibraryFileName != null)
+				toolTipString.append("  " + settings.louLibraryFileName);
+		}
 		toolTipString.append(System.getProperty("line.separator") + "Tables Path:");
-		if(settings.tablePath != null)
-			toolTipString.append("  " + settings.tablePath);
+		if(usingAPH)
+		{
+			if(settings.aphTablePath != null)
+				toolTipString.append("  " + settings.aphTablePath);
+		}
+		else
+		{
+			if(settings.louTablePath != null)
+				toolTipString.append("  " + settings.louTablePath);
+		}
 		tableListLabel.setToolTipText(toolTipString.toString());
+	}
+
+	private final class UsingAPHHandler extends BaseAction
+	{
+		@Override
+		public void widgetSelected(SelectionEvent ignored)
+		{
+			usingAPH = !usingAPH;
+			if(usingAPH)
+			{
+				menuItem.setText("use LibLouis");
+				if(settings.aphTableList != null)
+					tableListLabel.setText("Tables:  " + settings.aphTableList);
+				else
+					tableListLabel.setText("Tables:");
+			}
+			else
+			{
+				menuItem.setText("use LibLouisAPH");
+				if(settings.louTableList != null)
+					tableListLabel.setText("Tables:  " + settings.louTableList);
+				else
+					tableListLabel.setText("Tables:");
+			}
+			setTableListLabelToolTip();
+		}
 	}
 
 	private final class SetLibraryPathDialogAction extends BaseAction
@@ -148,30 +194,49 @@ public class Actions
 		public void widgetSelected(SelectionEvent ignored)
 		{
 			FileDialog fileDialog = new FileDialog(parentShell, SWT.OPEN);
-			fileDialog.setFileName(settings.libraryFileName);
+			if(usingAPH)
+				fileDialog.setFileName(settings.aphLibraryFileName);
+			else
+				fileDialog.setFileName(settings.louLibraryFileName);
 			String fileName = fileDialog.open();
 			if(fileName == null)
 				return;
 
 			if(!new File(fileName).exists())
 			{
-				Message.messageError("Liblouis library does not exist:  " + fileName, true);
+				if(usingAPH)
+					Message.messageError("LiblouisAPH library does not exist:  " + fileName, true);
+				else
+					Message.messageError("Liblouis library does not exist:  " + fileName, true);
 				return;
 			}
 
 			try
 			{
-				LibLouis.loadLibrary(fileName);
-				settings.libraryFileName = fileName;
-				setTableListLabelToolTip();
+				if(usingAPH)
+				{
+
+				}
+				else
+				{
+					LibLouis.loadLibrary(fileName);
+					settings.louLibraryFileName = fileName;
+					setTableListLabelToolTip();
+				}
 			}
 			catch(UnsatisfiedLinkError error)
 			{
-				Message.messageError("Invalid liblouis library:  " + fileName, error, true);
+				if(usingAPH)
+					Message.messageError("Invalid liblouisAPH library:  " + fileName, error, true);
+				else
+					Message.messageError("Invalid liblouis library:  " + fileName, error, true);
 				return;
 			}
 
-			settings.libraryFileName = fileName;
+			if(usingAPH)
+				settings.aphLibraryFileName = fileName;
+			else
+				settings.louLibraryFileName = fileName;
 		}
 	}
 
@@ -187,13 +252,24 @@ public class Actions
 
 			try
 			{
-				LibLouis.lou_setDataPath(directoryName);
-				settings.tablePath = directoryName;
+				if(usingAPH)
+				{
+					LibLouisAPH.louis_set_path(directoryName);
+					settings.aphTablePath = directoryName;
+				}
+				else
+				{
+					LibLouis.lou_setDataPath(directoryName);
+					settings.louTablePath = directoryName;
+				}
 				setTableListLabelToolTip();
 			}
 			catch(UnsatisfiedLinkError error)
 			{
-				Message.messageError("Invalid liblouis library:  " + settings.libraryFileName, error, true);
+				if(usingAPH)
+					Message.messageError("Invalid liblouisAPH library:  " + settings.aphLibraryFileName, error, true);
+				else
+					Message.messageError("Invalid liblouis library:  " + settings.louLibraryFileName, error, true);
 				return;
 			}
 		}
@@ -222,7 +298,10 @@ public class Actions
 			shell.setLayout(new GridLayout(1, true));
 
 			text = new Text(shell, SWT.SINGLE | SWT.LEFT);
-			text.setText(settings.tablePath);
+			if(usingAPH)
+				text.setText(settings.aphTablePath);
+			else
+				text.setText(settings.louTablePath);
 			text.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1));
 			text.addKeyListener(this);
 
@@ -248,13 +327,24 @@ public class Actions
 		{
 			try
 			{
-				LibLouis.lou_setDataPath(tablePath);
-				settings.tablePath = tablePath;
+				if(usingAPH)
+				{
+					//LibLouis.lou_setDataPath(tablePath);
+					settings.aphTablePath = tablePath;
+				}
+				else
+				{
+					LibLouis.lou_setDataPath(tablePath);
+					settings.louTablePath = tablePath;
+				}
 				setTableListLabelToolTip();
 			}
 			catch(UnsatisfiedLinkError error)
 			{
-				Message.messageError("Invalid liblouis library:  " + settings.libraryFileName, error, true);
+				if(usingAPH)
+					Message.messageError("Invalid liblouisAPH library:  " + settings.aphLibraryFileName, error, true);
+				else
+					Message.messageError("Invalid liblouis library:  " + settings.louLibraryFileName, error, true);
 				return;
 			}
 		}
@@ -307,8 +397,16 @@ public class Actions
 			shell.setLayout(new GridLayout(1, true));
 
 			text = new Text(shell, SWT.SINGLE | SWT.LEFT);
-			if(settings.tableList != null)
-				text.setText(settings.tableList);
+			if(usingAPH)
+			{
+				if(settings.aphTableList != null)
+					text.setText(settings.aphTableList);
+			}
+			else
+			{
+				if(settings.louTableList != null)
+					text.setText(settings.louTableList);
+			}
 			text.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1));
 			text.addKeyListener(this);
 
@@ -333,9 +431,18 @@ public class Actions
 		@Override
 		public void widgetSelected(SelectionEvent event)
 		{
-			if(event.widget == okButton) {
-				settings.tableList = text.getText();
-				tableListLabel.setText("Tables:  " + settings.tableList);
+			if(event.widget == okButton)
+			{
+				if(usingAPH)
+				{
+					settings.aphTableList = text.getText();
+					tableListLabel.setText("Tables:  " + settings.aphTableList);
+				}
+				else
+				{
+					settings.louTableList = text.getText();
+					tableListLabel.setText("Tables:  " + settings.louTableList);
+				}
 				parentShell.layout();
 			}
 			shell.dispose();
@@ -349,8 +456,16 @@ public class Actions
 		{
 			if(event.keyCode == '\r' || event.keyCode == '\n')
 			{
-				settings.tableList = text.getText();
-				tableListLabel.setText("Tables:  " + settings.tableList);
+				if(usingAPH)
+				{
+					settings.aphTableList = text.getText();
+					tableListLabel.setText("Tables:  " + settings.aphTableList);
+				}
+				else
+				{
+					settings.louTableList = text.getText();
+					tableListLabel.setText("Tables:  " + settings.louTableList);
+				}
 				parentShell.layout();
 				shell.dispose();
 			}
@@ -422,7 +537,7 @@ public class Actions
 		@Override
 		public void widgetSelected(SelectionEvent ignored)
 		{
-			if(!settings.areLibraryFilesValid(true))
+			if(!settings.areLouLibraryFilesValid(true))
 				return;
 
 			String inputLines[] = textTranslate.getTextLines();
@@ -442,7 +557,10 @@ public class Actions
 				String outputLine = "";
 				try
 				{
-					outputLine = LibLouis.translateString(settings.tableList, inputLine, inputLine.length() * 3, null, null, 0);
+					if(usingAPH)
+						outputLine = LibLouisAPH.louisTranslateString(inputLine, settings.aphTableList, null, null, null);
+					else
+						outputLine = LibLouis.translateString(settings.louTableList, inputLine, inputLine.length() * 3, null, null, 0);
 				}
 				catch(UnsupportedEncodingException exception)
 				{
@@ -451,7 +569,10 @@ public class Actions
 				}
 				catch(UnsatisfiedLinkError error)
 				{
-					Message.messageError("Invalid liblouis library:  " + settings.libraryFileName, error, true);
+					if(usingAPH)
+						Message.messageError("Invalid liblouisAPH library:  " + settings.aphLibraryFileName, error, true);
+					else
+						Message.messageError("Invalid liblouis library:  " + settings.louLibraryFileName, error, true);
 					return;
 				}
 				catch(Exception exception)
@@ -477,7 +598,7 @@ public class Actions
 		@Override
 		public void widgetSelected(SelectionEvent ignored)
 		{
-			if(!settings.areLibraryFilesValid(true))
+			if(!settings.areLouLibraryFilesValid(true))
 				return;
 
 			String inputLines[] = textTranslate.getBrailleLines();
@@ -497,7 +618,10 @@ public class Actions
 				String outputLine = "";
 				try
 				{
-					outputLine = LibLouis.backTranslateString(settings.tableList, inputLine, inputLine.length() * 3, null, null, 0);
+					if(usingAPH)
+						outputLine = LibLouisAPH.louisBackTranslateString(inputLine, settings.aphTableList, null, null, null);
+					else
+						outputLine = LibLouis.backTranslateString(settings.louTableList, inputLine, inputLine.length() * 3, null, null, 0);
 				}
 				catch(UnsupportedEncodingException exception)
 				{
@@ -506,7 +630,10 @@ public class Actions
 				}
 				catch(UnsatisfiedLinkError error)
 				{
-					Message.messageError("Invalid liblouis library:  " + settings.libraryFileName, error, true);
+					if(usingAPH)
+						Message.messageError("Invalid liblouisAPH library:  " + settings.aphLibraryFileName, error, true);
+					else
+						Message.messageError("Invalid liblouis library:  " + settings.louLibraryFileName, error, true);
 					return;
 				}
 				catch(Exception exception)

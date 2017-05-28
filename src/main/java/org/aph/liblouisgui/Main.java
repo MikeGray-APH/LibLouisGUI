@@ -60,16 +60,29 @@ public class Main
 		Settings settings = new Settings(display, null);
 		if(settings.readSettings())
 		{
-			if(settings.areLibraryFilesValid(false))
+			if(settings.areLouLibraryFilesValid(false))
 			{
 				try
 				{
-					LibLouis.loadLibrary(settings.libraryFileName);
-					LibLouis.lou_setDataPath(settings.tablePath);
+					LibLouis.loadLibrary(settings.louLibraryFileName);
+					LibLouis.lou_setDataPath(settings.louTablePath);
 				}
 				catch(UnsatisfiedLinkError error)
 				{
-					Message.messageError("Invalid liblouis library:  " + settings.libraryFileName, error, true);
+					Message.messageError("Invalid liblouis library:  " + settings.louLibraryFileName, error, true);
+				}
+			}
+
+			if(settings.areAPHLibraryFilesValid(false))
+			{
+				try
+				{
+					LibLouisAPH.loadLibrary(settings.aphLibraryFileName);
+					LibLouisAPH.louis_set_path(settings.aphTablePath);
+				}
+				catch(UnsatisfiedLinkError error)
+				{
+					Message.messageError("Invalid liblouisAPH library:  " + settings.aphLibraryFileName, error, true);
 				}
 			}
 		}
@@ -92,6 +105,7 @@ public class Main
 		settings.writeSettings();
 	}
 
+	//TODO:  check if font is already on the system
 	private void loadFont(String fontFileName)
 	{
 		try

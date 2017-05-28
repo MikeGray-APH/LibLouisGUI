@@ -28,7 +28,9 @@ import java.io.PrintWriter;
 
 public class Settings
 {
-	String version, libraryFileName, tablePath, tableList;
+	String version;
+	String louLibraryFileName, louTablePath, louTableList;
+	String aphLibraryFileName, aphTablePath, aphTableList;
 	Font textFont, brailleFont;
 
 	private final Display display;
@@ -61,9 +63,13 @@ public class Settings
 		{
 		case "version":  version = value;  break;
 
-		case "library.fileName":  libraryFileName = value;  break;
-		case "table.path":        tablePath = value;        break;
-		case "table.list":        tableList = value;        break;
+		case "lou.library.fileName":  louLibraryFileName = value;  break;
+		case "lou.table.path":        louTablePath = value;        break;
+		case "lou.table.list":        louTableList = value;        break;
+
+		case "aph.library.fileName":  aphLibraryFileName = value;  break;
+		case "aph.table.path":        aphTablePath = value;        break;
+		case "aph.table.list":        aphTableList = value;        break;
 
 		case "text.font":
 
@@ -162,12 +168,19 @@ public class Settings
 		if(version != null)
 			writer.println("version " + version);
 
-		if(libraryFileName != null)
-			writer.println("library.fileName " + libraryFileName);
-		if(tablePath != null)
-		writer.println("table.path " + tablePath);
-		if(tableList != null)
-			writer.println("table.list " + tableList);
+		if(louLibraryFileName != null)
+			writer.println("lou.library.fileName " + louLibraryFileName);
+		if(louTablePath != null)
+		writer.println("lou.table.path " + louTablePath);
+		if(louTableList != null)
+			writer.println("lou.table.list " + louTableList);
+
+		if(aphLibraryFileName != null)
+			writer.println("aph.library.fileName " + aphLibraryFileName);
+		if(aphTablePath != null)
+			writer.println("aph.table.path " + aphTablePath);
+		if(aphTableList != null)
+			writer.println("aph.table.list " + aphTableList);
 
 		if(textFont != null)
 		{
@@ -223,31 +236,65 @@ public class Settings
 		return true;
 	}
 
-	boolean areLibraryFilesValid(boolean outMessage)
+	boolean areLouLibraryFilesValid(boolean outMessage)
 	{
-		if(libraryFileName == null)
+		if(louLibraryFileName == null)
 		{
 			if(outMessage)
 				Message.messageError("Liblouis library not set", true);
 			return false;
 		}
 
-		if(!new File(libraryFileName).exists())
+		if(!new File(louLibraryFileName).exists())
 		{
 			if(outMessage)
-				Message.messageError("Liblouis library does not exist:  " + libraryFileName, true);
+				Message.messageError("Liblouis library does not exist:  " + louLibraryFileName, true);
 			return false;
 		}
 
 		//TODO:  some libraries don't need it
-//		if(tablePath == null)
+//		if(louTablePath == null)
 //		{
 //			if(outMessage)
 //				Message.messageError("Table path not set", true);
 //			return false;
 //		}
 
-		if(tableList == null)
+		if(louTableList == null)
+		{
+			if(outMessage)
+				Message.messageError("Tables not set", true);
+			return false;
+		}
+
+		return true;
+	}
+
+	boolean areAPHLibraryFilesValid(boolean outMessage)
+	{
+		if(aphLibraryFileName == null)
+		{
+			if(outMessage)
+				Message.messageError("LiblouisAPH library not set", true);
+			return false;
+		}
+
+		if(!new File(aphLibraryFileName).exists())
+		{
+			if(outMessage)
+				Message.messageError("LiblouisAPH library does not exist:  " + aphLibraryFileName, true);
+			return false;
+		}
+
+		//TODO:  some libraries don't need it
+//		if(aphTablePath == null)
+//		{
+//			if(outMessage)
+//				Message.messageError("Table path not set", true);
+//			return false;
+//		}
+
+		if(aphTableList == null)
 		{
 			if(outMessage)
 				Message.messageError("Tables not set", true);

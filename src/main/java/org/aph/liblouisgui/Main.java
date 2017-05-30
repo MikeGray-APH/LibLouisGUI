@@ -44,18 +44,18 @@ public class Main
 		Message.setShell(shell);
 
 		//   load fonts
-		loadFont("BrailleZephyr_6.otf");
-		loadFont("BrailleZephyr_6b.otf");
-		loadFont("BrailleZephyr_6s.otf");
-		loadFont("BrailleZephyr_6sb.otf");
-		loadFont("BrailleZephyr_8.otf");
-		loadFont("BrailleZephyr_8b.otf");
-		loadFont("BrailleZephyr_8s.otf");
-		loadFont("BrailleZephyr_8sb.otf");
-		loadFont("BrailleZephyr_8w.otf");
-		loadFont("BrailleZephyr_8wb.otf");
-		loadFont("BrailleZephyr_8ws.otf");
-		loadFont("BrailleZephyr_8wsb.otf");
+		loadFont("APH_Braille_Font-6.otf");
+		loadFont("APH_Braille_Font-6b.otf");
+		loadFont("APH_Braille_Font-6s.otf");
+		loadFont("APH_Braille_Font-6sb.otf");
+		loadFont("APH_Braille_Font-8.otf");
+		loadFont("APH_Braille_Font-8b.otf");
+		loadFont("APH_Braille_Font-8s.otf");
+		loadFont("APH_Braille_Font-8sb.otf");
+		loadFont("APH_Braille_Font-8w.otf");
+		loadFont("APH_Braille_Font-8wb.otf");
+		loadFont("APH_Braille_Font-8ws.otf");
+		loadFont("APH_Braille_Font-8wsb.otf");
 
 		Settings settings = new Settings(display, null);
 		if(settings.readSettings())

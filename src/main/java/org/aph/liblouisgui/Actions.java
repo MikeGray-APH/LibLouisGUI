@@ -95,7 +95,7 @@ public class Actions
 
 		new UsingAPHHandler().addToMenu(menu, "use LibLouisAPH", 0, true);
 		new MenuItem(menu, SWT.SEPARATOR);
-		new SetLibraryPathDialogAction().addToMenu(menu, "Set LibLouis Path", 0, true);
+		new SetLibraryPathDialogAction().addToMenu(menu, "Set Library Path", 0, true);
 		new SetTablePathDialogAction().addToMenu(menu, "Set Table Path", 0, true);
 		new EditTablePathAction().addToMenu(menu, "Edit Table Path", 0, true);
 		new EditTableListAction().addToMenu(menu, "Edit Tables", 0, true);
@@ -215,7 +215,9 @@ public class Actions
 			{
 				if(usingAPH)
 				{
-
+					LibLouisAPH.loadLibrary(fileName);
+					settings.aphLibraryFileName = fileName;
+					setTableListLabelToolTip();
 				}
 				else
 				{

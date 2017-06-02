@@ -15,23 +15,28 @@
 
 package org.aph.liblouisgui;
 
+import com.sun.jna.Callback;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.NativeLibrary;
-import com.sun.jna.ptr.IntByReference;
 
 import java.io.UnsupportedEncodingException;
 
 public class LibLouisAPH
 {
-
+	static LibLouisAPHLog libLouisAPHLog = new LibLouisAPHLog();
+	
 	public static void loadLibrary(String libraryPath)
 	{
 		NativeLibrary library = NativeLibrary.getInstance(libraryPath);
 		Native.register(library);
+		
+		louis_set_log_callback(libLouisAPHLog);
 	}
 
 	public static native String louis_get_version();
+	
+	public static native void louis_set_log_callback(LibLouisAPHCallback libLouisAPHCallback);
 
 	public static native void louis_set_path(String path);
 
@@ -82,3 +87,16 @@ public class LibLouisAPH
 	}
 }
 
+interface LibLouisAPHCallback extends Callback
+{
+	void logMessage(int level, String message);
+}
+
+class LibLouisAPHLog implements LibLouisAPHCallback
+{
+	@Override
+	public void logMessage(int level, String message)
+	{
+		System.out.println(message);
+	}
+}

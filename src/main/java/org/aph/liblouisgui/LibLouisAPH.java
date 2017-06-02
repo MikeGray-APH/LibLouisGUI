@@ -16,7 +16,6 @@
 package org.aph.liblouisgui;
 
 import com.sun.jna.Callback;
-import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.NativeLibrary;
 
@@ -40,50 +39,57 @@ public class LibLouisAPH
 
 	public static native void louis_set_path(String path);
 
-	public static native int louis_translate_forward(Memory dots, int dots_len, Memory chars, int chars_len, String tables_name, String conversion_name, int chars_to_dots_map[], int dots_to_chars_map[]);
+	public static native int louis_translate_forward(char dots[], int dots_len, char chars[], int chars_len, String tables_name, String conversion_name, int chars_to_dots_map[], int dots_to_chars_map[]);
 
-	public static native int louis_translate_backward(Memory dots, int dots_len, Memory chars, int chars_len, String tables_name, String conversion_name, int chars_to_dots_map[], int dots_to_chars_map[]);
+	public static native int louis_translate_backward(char chars[], int chars_len, char dots[], int dots_len, String tables_name, String conversion_name, int chars_to_dots_map[], int dots_to_chars_map[]);
+
+	private static String translate(String charsString, String tables, String conversion, int charsToDotsMap[], int dotsToCharsMap[], boolean forward) throws UnsupportedEncodingException
+	{
+		int charsLength = charsString.length();
+		char charsChars[] = new char[charsLength + 1];
+		charsString.getChars(0, charsLength, charsChars, 0);
+		
+		int dotsLength = charsLength * 5;
+		if(dotsLength < 0x100)
+			dotsLength = 0x100;
+		char dotsChars[] = new char[dotsLength + 1];
+		
+		int charsToDotsMapInts[] = null;
+		if(charsToDotsMap != null)
+			charsToDotsMapInts = new int[charsLength];
+		
+		int dotsToCharsMapInts[] = null;
+		if(dotsToCharsMap != null)
+			dotsToCharsMapInts = new int[dotsLength];
+		
+		int length = 0;
+		if(forward)
+			length = louis_translate_forward(dotsChars, dotsLength, charsChars, charsLength, tables, conversion, charsToDotsMapInts, dotsToCharsMapInts);
+		else
+			length = louis_translate_backward(dotsChars, dotsLength, charsChars, charsLength, tables, conversion, charsToDotsMapInts, dotsToCharsMapInts);
+		
+		if(length == 0)
+			return null;
+		
+		if(charsToDotsMapInts != null)
+		for(int i = 0; i < charsLength && i < charsToDotsMap.length; i++)
+			charsToDotsMap[i] = charsToDotsMapInts[i];
+		
+		if(dotsToCharsMapInts != null)
+		for(int i = 0; i < length && i < dotsToCharsMap.length; i++)
+			dotsToCharsMap[i] = dotsToCharsMapInts[i];
+		
+		return new String(dotsChars, 0, length);
+	}
 
 	public static String translateForward(String charsString, String tables, String conversion, int charsToDotsMap[], int dotsToCharsMap[]) throws UnsupportedEncodingException
 	{
-		byte charsBytes[] = charsString.getBytes("UTF-16LE");
-		Memory charsBuffer = new Memory(charsBytes.length);
-		charsBuffer.write(0, charsBytes, 0, charsBytes.length);
-		int charsLength = charsString.length();
-
-		int dotsLength = charsString.length() * 5;
-		if(dotsLength < 0x100)
-			dotsLength = 0x100;
-		Memory dotsBuffer = new Memory(dotsLength);
-
-		int length = louis_translate_forward(dotsBuffer, dotsLength, charsBuffer, charsLength, tables, conversion, null, null);
-
-		if(length == 0)
-			return null;
-
-		byte dotsBytes[] = dotsBuffer.getByteArray(0, length * 2);
-		return new String(dotsBytes, "UTF-16LE");
+		return translate(charsString, tables, conversion, charsToDotsMap, dotsToCharsMap, true);
 	}
 
-	public static String translateBackward(String dotsString, String tables, String conversion, int charsToDotsMap[], int dotsToCharsMap[]) throws UnsupportedEncodingException
+	public static String translateBackward(String dotsString, String tables, String conversion, int dotsToCharsMap[], int charsToDotsMap[]) throws UnsupportedEncodingException
 	{
-		byte dotsBytes[] = dotsString.getBytes("UTF-16LE");
-		Memory dotsBuffer = new Memory(dotsBytes.length);
-		dotsBuffer.write(0, dotsBytes, 0, dotsBytes.length);
-		int dotsLength = dotsString.length();
-
-		int charsLength = dotsString.length() * 7;
-		if(charsLength < 0x100)
-			charsLength = 0x100;
-		Memory charsBuffer = new Memory(charsLength * 2);
-
-		int length = louis_translate_backward(charsBuffer, charsLength, dotsBuffer, dotsLength, tables, conversion, null, null);
-
-		if(length == 0)
-			return null;
-
-		byte charsBytes[] = charsBuffer.getByteArray(0, length * 2);
-		return new String(charsBytes, "UTF-16LE");
+		return translate(dotsString, tables, conversion, dotsToCharsMap, charsToDotsMap, false);
 	}
 }
 

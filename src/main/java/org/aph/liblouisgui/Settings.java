@@ -30,7 +30,8 @@ public class Settings
 {
 	String version;
 	String louLibraryFileName, louTablePath, louTableList;
-	String aphLibraryFileName, aphTablePath, aphTableList;
+	String aphLibraryFileName, aphTablePath, aphTableList, aphConversionFileName;
+	boolean usingAPH;
 	Font textFont, brailleFont;
 
 	private final Display display;
@@ -67,9 +68,20 @@ public class Settings
 		case "lou.table.path":        louTablePath = value;        break;
 		case "lou.table.list":        louTableList = value;        break;
 
-		case "aph.library.fileName":  aphLibraryFileName = value;  break;
-		case "aph.table.path":        aphTablePath = value;        break;
-		case "aph.table.list":        aphTableList = value;        break;
+		case "aph.library.fileName":     aphLibraryFileName = value;     break;
+		case "aph.table.path":           aphTablePath = value;           break;
+		case "aph.table.list":           aphTableList = value;           break;
+		case "aph.conversion.fileName":  aphConversionFileName = value;  break;
+
+		case "using.library":
+
+			if(value.equals("LibLouis"))
+				usingAPH = false;
+			else if(value.equals("LibLouisAPH"))
+				usingAPH = true;
+			else
+				return false;
+			break;
 
 		case "text.font":
 
@@ -181,6 +193,13 @@ public class Settings
 			writer.println("aph.table.path " + aphTablePath);
 		if(aphTableList != null)
 			writer.println("aph.table.list " + aphTableList);
+		if(aphConversionFileName != null)
+			writer.println("aph.conversion.fileName " + aphConversionFileName);
+
+		if(usingAPH)
+			writer.println("using.library LibLouisAPH");
+		else
+			writer.println("using.library LibLouis");
 
 		if(textFont != null)
 		{
@@ -241,14 +260,14 @@ public class Settings
 		if(louLibraryFileName == null)
 		{
 			if(outMessage)
-				Message.messageError("Liblouis library not set", true);
+				Message.messageError("LibLouis library not set", true);
 			return false;
 		}
 
 		if(!new File(louLibraryFileName).exists())
 		{
 			if(outMessage)
-				Message.messageError("Liblouis library does not exist:  " + louLibraryFileName, true);
+				Message.messageError("LibLouis library does not exist:  " + louLibraryFileName, true);
 			return false;
 		}
 
@@ -275,14 +294,14 @@ public class Settings
 		if(aphLibraryFileName == null)
 		{
 			if(outMessage)
-				Message.messageError("LiblouisAPH library not set", true);
+				Message.messageError("LibLouisAPH library not set", true);
 			return false;
 		}
 
 		if(!new File(aphLibraryFileName).exists())
 		{
 			if(outMessage)
-				Message.messageError("LiblouisAPH library does not exist:  " + aphLibraryFileName, true);
+				Message.messageError("LibLouisAPH library does not exist:  " + aphLibraryFileName, true);
 			return false;
 		}
 

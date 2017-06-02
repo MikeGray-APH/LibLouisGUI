@@ -24,7 +24,6 @@ import java.io.UnsupportedEncodingException;
 
 public class LibLouis
 {
-
 	public static void loadLibrary(String libraryPath)
 	{
 		NativeLibrary library = NativeLibrary.getInstance(libraryPath);
@@ -57,9 +56,8 @@ public class LibLouis
 
 		int length = outlen.getValue();
 		byte outputBytes[] = outbuf.getByteArray(0, length * 2);
-		String outputString = new String(outputBytes, "UTF-16LE");
-
-		return outputString;
+		
+		return new String(outputBytes, "UTF-16LE");
 	}
 
 	public static String backTranslateString(String tables, String inputString, int outputMax, short typeforms[], byte spacing[], int mode) throws UnsupportedEncodingException
@@ -77,8 +75,7 @@ public class LibLouis
 
 		int length = outlen.getValue();
 		byte outputBytes[] = outbuf.getByteArray(0, length * 2);
-		String outputString = new String(outputBytes, "UTF-16LE");
-
-		return outputString;
+		
+		return new String(outputBytes, "UTF-16LE");
 	}
 }

@@ -24,7 +24,7 @@ import java.io.UnsupportedEncodingException;
 
 public class LibLouisAPH
 {
-	static LibLouisAPHLog libLouisAPHLog = new LibLouisAPHLog();
+	static final LibLouisAPHCallback libLouisAPHLog = new LibLouisAPHLog();
 	
 	public static void loadLibrary(String libraryPath)
 	{
@@ -44,7 +44,7 @@ public class LibLouisAPH
 
 	public static native int louis_translate_backward(Memory dots, int dots_len, Memory chars, int chars_len, String tables_name, String conversion_name, int chars_to_dots_map[], int dots_to_chars_map[]);
 
-	public static String louisTranslateString(String charsString, String tables, String conversion, int charsToDotsMap[], int dotsToCharsMap[]) throws UnsupportedEncodingException
+	public static String translateForward(String charsString, String tables, String conversion, int charsToDotsMap[], int dotsToCharsMap[]) throws UnsupportedEncodingException
 	{
 		byte charsBytes[] = charsString.getBytes("UTF-16LE");
 		Memory charsBuffer = new Memory(charsBytes.length);
@@ -65,7 +65,7 @@ public class LibLouisAPH
 		return new String(dotsBytes, "UTF-16LE");
 	}
 
-	public static String louisBackTranslateString(String dotsString, String tables, String conversion, int charsToDotsMap[], int dotsToCharsMap[]) throws UnsupportedEncodingException
+	public static String translateBackward(String dotsString, String tables, String conversion, int charsToDotsMap[], int dotsToCharsMap[]) throws UnsupportedEncodingException
 	{
 		byte dotsBytes[] = dotsString.getBytes("UTF-16LE");
 		Memory dotsBuffer = new Memory(dotsBytes.length);

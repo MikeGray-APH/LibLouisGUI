@@ -69,7 +69,7 @@ public class Main
 				}
 				catch(UnsatisfiedLinkError error)
 				{
-					Message.messageError("Invalid liblouis library:  " + settings.louLibraryFileName, error, true);
+					Message.messageError("Invalid LibLouis library:  " + settings.louLibraryFileName, error, true);
 				}
 			}
 
@@ -82,7 +82,7 @@ public class Main
 				}
 				catch(UnsatisfiedLinkError error)
 				{
-					Message.messageError("Invalid liblouisAPH library:  " + settings.aphLibraryFileName, error, true);
+					Message.messageError("Invalid LibLouisAPH library:  " + settings.aphLibraryFileName, error, true);
 				}
 			}
 		}
@@ -93,7 +93,7 @@ public class Main
 
 		new Actions(shell, settings, textTranslate, tableListLabel);
 
-		//   need to set size after everthing has been added
+		//   need to set size after everything has been added
 		shell.setSize(320, 480);
 		shell.open();
 		while(!shell.isDisposed())

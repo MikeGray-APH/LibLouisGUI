@@ -49,8 +49,6 @@ public class Actions
 	private final TextTranslate textTranslate;
 	private final Label tableListLabel;
 
-	private boolean usingAPH = false;
-
 	public Actions(Shell parentShell, Settings settings, TextTranslate textTranslate, Label tableListLabel)
 	{
 		this.parentShell = parentShell;
@@ -58,10 +56,20 @@ public class Actions
 		this.textTranslate = textTranslate;
 		this.tableListLabel = tableListLabel;
 
-		if(settings.louTableList != null)
-			tableListLabel.setText("Tables:  " + settings.louTableList);
+		if(settings.usingAPH)
+		{
+			if(settings.aphTableList != null)
+				tableListLabel.setText("Tables:  " + settings.aphTableList);
+			else
+				tableListLabel.setText("Tables:");
+		}
 		else
-			tableListLabel.setText("Tables:");
+		{
+			if(settings.louTableList != null)
+				tableListLabel.setText("Tables:  " + settings.louTableList);
+			else
+				tableListLabel.setText("Tables:");
+		}
 		setTableListLabelToolTip();
 
 		if(settings.textFont != null)
@@ -93,12 +101,15 @@ public class Actions
 		item.setText("&Settings");
 		item.setMenu(menu);
 
-		new UsingAPHHandler().addToMenu(menu, "use LibLouisAPH", 0, true);
+		EditConversionFileNameAction editConversionFileNameAction = new EditConversionFileNameAction();
+		new SwitchLibraryHandler(editConversionFileNameAction).addToMenu(menu, "use", 0, true);
 		new MenuItem(menu, SWT.SEPARATOR);
-		new SetLibraryPathDialogAction().addToMenu(menu, "Set Library Path", 0, true);
+		new SetLibraryPathDialogAction().addToMenu(menu, "Set LibLouis Path", 0, true);
 		new SetTablePathDialogAction().addToMenu(menu, "Set Table Path", 0, true);
 		new EditTablePathAction().addToMenu(menu, "Edit Table Path", 0, true);
 		new EditTableListAction().addToMenu(menu, "Edit Tables", 0, true);
+		editConversionFileNameAction.addToMenu(menu, "Edit Conversion", 0, true);
+		editConversionFileNameAction.menuItem.setEnabled(settings.usingAPH);
 		new MenuItem(menu, SWT.SEPARATOR);
 		new TextFontHandler().addToMenu(menu, "Text Font", 0, true);
 		new BrailleFontHandler().addToMenu(menu, "Braille Font", 0, true);
@@ -110,9 +121,9 @@ public class Actions
 		item.setMenu(menu);
 
 		//   cut, copy, and paste accelerators are handled by StyledText.
-		new CutAction().addToMenu(menu, "Cut\t" + mod1KeyName + "X", 0, true);
-		new CopyAction().addToMenu(menu, "Copy\t" + mod1KeyName + "C", 0, true);
-		new PasteAction().addToMenu(menu, "Paste\t" + mod1KeyName + "V", 0, true);
+		new CutAction().addToMenu(menu, "Cut\t" + mod1KeyName + 'X', 0, true);
+		new CopyAction().addToMenu(menu, "Copy\t" + mod1KeyName + 'C', 0, true);
+		new PasteAction().addToMenu(menu, "Paste\t" + mod1KeyName + 'V', 0, true);
 
 		//   translate menu
 		menu = new Menu(menuBar);
@@ -120,10 +131,10 @@ public class Actions
 		item.setText("&Translate");
 		item.setMenu(menu);
 
-		new TranslateTextAction().addToMenuAndToolBar(menu, toolBar, "translate", 0, true);
-		new TranslateBrailleAction().addToMenuAndToolBar(menu, toolBar, "back-translate", 0, true);
-		new ConvertToUnicode().addToMenuAndToolBar(menu, toolBar, "unicode", 0, true);
-		new ConvertToAscii().addToMenuAndToolBar(menu, toolBar, "ascii", 0, true);
+		new TranslateTextAction().addToMenuAndToolBar(menu, toolBar, "translate", 0, "forward-32x32.png", true);
+		new TranslateBrailleAction().addToMenuAndToolBar(menu, toolBar, "back-translate", 0, "backward-32x32.png", true);
+		new ConvertToUnicode().addToMenuAndToolBar(menu, toolBar, "unicode", 0, "unicode-32x32.png", true);
+		new ConvertToAscii().addToMenuAndToolBar(menu, toolBar, "ascii", 0, "ascii-32x32.png", true);
 
 		//   about menu
 		menu = new Menu(menuBar);
@@ -136,45 +147,71 @@ public class Actions
 
 	private void setTableListLabelToolTip()
 	{
-		StringBuilder toolTipString = new StringBuilder();
+		StringBuilder toolTipString = new StringBuilder(100);
 		toolTipString.append("Library:");
-		if(usingAPH)
+		if(settings.usingAPH)
 		{
 			if(settings.aphLibraryFileName != null)
-				toolTipString.append("  " + settings.aphLibraryFileName);
+				toolTipString.append("  ").append(settings.aphLibraryFileName);
 		}
 		else
 		{
 			if(settings.louLibraryFileName != null)
-				toolTipString.append("  " + settings.louLibraryFileName);
+				toolTipString.append("  ").append(settings.louLibraryFileName);
 		}
-		toolTipString.append(System.getProperty("line.separator") + "Tables Path:");
-		if(usingAPH)
+		toolTipString.append(System.getProperty("line.separator")).append("Tables Path:");
+		if(settings.usingAPH)
 		{
 			if(settings.aphTablePath != null)
-				toolTipString.append("  " + settings.aphTablePath);
+				toolTipString.append("  ").append(settings.aphTablePath);
 		}
 		else
 		{
 			if(settings.louTablePath != null)
-				toolTipString.append("  " + settings.louTablePath);
+				toolTipString.append("  ").append(settings.louTablePath);
+		}
+		if(settings.usingAPH)
+		{
+			toolTipString.append(System.getProperty("line.separator")).append("Conversion File:");
+			if(settings.aphConversionFileName != null)
+				toolTipString.append("  ").append(settings.aphConversionFileName);
 		}
 		tableListLabel.setToolTipText(toolTipString.toString());
 	}
 
-	private final class UsingAPHHandler extends BaseAction
+	private final class SwitchLibraryHandler extends BaseAction
 	{
+		final EditConversionFileNameAction editConversionFileNameAction;
+
+		public SwitchLibraryHandler(EditConversionFileNameAction editConversionFileNameAction)
+		{
+			this.editConversionFileNameAction = editConversionFileNameAction;
+		}
+		
+		@Override
+		void addToMenu(Menu menu, String tag, int accelerator, boolean enabled)
+		{
+			super.addToMenu(menu, tag, accelerator, enabled);
+			
+			if(settings.usingAPH)
+				menuItem.setText("use LibLouis");
+			else
+				menuItem.setText("use LibLouisAPH");
+		}
+
 		@Override
 		public void widgetSelected(SelectionEvent ignored)
 		{
-			usingAPH = !usingAPH;
-			if(usingAPH)
+			settings.usingAPH = !settings.usingAPH;
+			if(settings.usingAPH)
 			{
 				menuItem.setText("use LibLouis");
 				if(settings.aphTableList != null)
 					tableListLabel.setText("Tables:  " + settings.aphTableList);
 				else
 					tableListLabel.setText("Tables:");
+
+				editConversionFileNameAction.menuItem.setEnabled(true);
 			}
 			else
 			{
@@ -183,6 +220,8 @@ public class Actions
 					tableListLabel.setText("Tables:  " + settings.louTableList);
 				else
 					tableListLabel.setText("Tables:");
+
+				editConversionFileNameAction.menuItem.setEnabled(false);
 			}
 			setTableListLabelToolTip();
 		}
@@ -194,7 +233,7 @@ public class Actions
 		public void widgetSelected(SelectionEvent ignored)
 		{
 			FileDialog fileDialog = new FileDialog(parentShell, SWT.OPEN);
-			if(usingAPH)
+			if(settings.usingAPH)
 				fileDialog.setFileName(settings.aphLibraryFileName);
 			else
 				fileDialog.setFileName(settings.louLibraryFileName);
@@ -204,16 +243,16 @@ public class Actions
 
 			if(!new File(fileName).exists())
 			{
-				if(usingAPH)
-					Message.messageError("LiblouisAPH library does not exist:  " + fileName, true);
+				if(settings.usingAPH)
+					Message.messageError("LibLouisAPH library does not exist:  " + fileName, true);
 				else
-					Message.messageError("Liblouis library does not exist:  " + fileName, true);
+					Message.messageError("LibLouis library does not exist:  " + fileName, true);
 				return;
 			}
 
 			try
 			{
-				if(usingAPH)
+				if(settings.usingAPH)
 				{
 					LibLouisAPH.loadLibrary(fileName);
 					settings.aphLibraryFileName = fileName;
@@ -228,14 +267,14 @@ public class Actions
 			}
 			catch(UnsatisfiedLinkError error)
 			{
-				if(usingAPH)
-					Message.messageError("Invalid liblouisAPH library:  " + fileName, error, true);
+				if(settings.usingAPH)
+					Message.messageError("Invalid LibLouisAPH library:  " + fileName, error, true);
 				else
-					Message.messageError("Invalid liblouis library:  " + fileName, error, true);
+					Message.messageError("Invalid LibLouis library:  " + fileName, error, true);
 				return;
 			}
 
-			if(usingAPH)
+			if(settings.usingAPH)
 				settings.aphLibraryFileName = fileName;
 			else
 				settings.louLibraryFileName = fileName;
@@ -254,7 +293,7 @@ public class Actions
 
 			try
 			{
-				if(usingAPH)
+				if(settings.usingAPH)
 				{
 					LibLouisAPH.louis_set_path(directoryName);
 					settings.aphTablePath = directoryName;
@@ -268,11 +307,10 @@ public class Actions
 			}
 			catch(UnsatisfiedLinkError error)
 			{
-				if(usingAPH)
+				if(settings.usingAPH)
 					Message.messageError("Invalid liblouisAPH library:  " + settings.aphLibraryFileName, error, true);
 				else
 					Message.messageError("Invalid liblouis library:  " + settings.louLibraryFileName, error, true);
-				return;
 			}
 		}
 	}
@@ -300,7 +338,7 @@ public class Actions
 			shell.setLayout(new GridLayout(1, true));
 
 			text = new Text(shell, SWT.SINGLE | SWT.LEFT);
-			if(usingAPH)
+			if(settings.usingAPH)
 				text.setText(settings.aphTablePath);
 			else
 				text.setText(settings.louTablePath);
@@ -329,7 +367,7 @@ public class Actions
 		{
 			try
 			{
-				if(usingAPH)
+				if(settings.usingAPH)
 				{
 					//LibLouis.lou_setDataPath(tablePath);
 					settings.aphTablePath = tablePath;
@@ -343,11 +381,10 @@ public class Actions
 			}
 			catch(UnsatisfiedLinkError error)
 			{
-				if(usingAPH)
+				if(settings.usingAPH)
 					Message.messageError("Invalid liblouisAPH library:  " + settings.aphLibraryFileName, error, true);
 				else
 					Message.messageError("Invalid liblouis library:  " + settings.louLibraryFileName, error, true);
-				return;
 			}
 		}
 
@@ -399,7 +436,7 @@ public class Actions
 			shell.setLayout(new GridLayout(1, true));
 
 			text = new Text(shell, SWT.SINGLE | SWT.LEFT);
-			if(usingAPH)
+			if(settings.usingAPH)
 			{
 				if(settings.aphTableList != null)
 					text.setText(settings.aphTableList);
@@ -435,7 +472,7 @@ public class Actions
 		{
 			if(event.widget == okButton)
 			{
-				if(usingAPH)
+				if(settings.usingAPH)
 				{
 					settings.aphTableList = text.getText();
 					tableListLabel.setText("Tables:  " + settings.aphTableList);
@@ -458,7 +495,7 @@ public class Actions
 		{
 			if(event.keyCode == '\r' || event.keyCode == '\n')
 			{
-				if(usingAPH)
+				if(settings.usingAPH)
 				{
 					settings.aphTableList = text.getText();
 					tableListLabel.setText("Tables:  " + settings.aphTableList);
@@ -469,6 +506,85 @@ public class Actions
 					tableListLabel.setText("Tables:  " + settings.louTableList);
 				}
 				parentShell.layout();
+				shell.dispose();
+			}
+		}
+
+		@Override
+		public void keyReleased(KeyEvent ignored){}
+	}
+
+	private final class EditConversionFileNameAction extends BaseAction
+	{
+		@Override
+		public void widgetSelected(SelectionEvent ignored)
+		{
+			new EditConversionFileNameDialog();
+		}
+	}
+
+	private final class EditConversionFileNameDialog implements SelectionListener, KeyListener
+	{
+		private final Shell shell;
+		private final Text text;
+		private final Button okButton;
+		private final Button cancelButton;
+
+		private EditConversionFileNameDialog()
+		{
+			shell = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
+			shell.setText("tables");
+			shell.setLayout(new GridLayout(1, true));
+
+			text = new Text(shell, SWT.SINGLE | SWT.LEFT);
+			if(settings.aphConversionFileName != null)
+				text.setText(settings.aphConversionFileName);
+			text.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1));
+			text.addKeyListener(this);
+
+			Composite composite = new Composite(shell, 0);
+			composite.setLayout(new GridLayout(2, true));
+			composite.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, true));
+
+			okButton = new Button(composite, SWT.PUSH);
+			okButton.setText("OK");
+			okButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+			okButton.addSelectionListener(this);
+
+			cancelButton = new Button(composite, SWT.PUSH);
+			cancelButton.setText("Cancel");
+			cancelButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+			cancelButton.addSelectionListener(this);
+
+			shell.pack();
+			shell.open();
+		}
+
+		@Override
+		public void widgetSelected(SelectionEvent event)
+		{
+			if(event.widget == okButton)
+			{
+				settings.aphConversionFileName = text.getText();
+				if(settings.aphConversionFileName.length() == 0)
+					settings.aphConversionFileName = null;
+				setTableListLabelToolTip();
+			}
+			shell.dispose();
+		}
+
+		@Override
+		public void widgetDefaultSelected(SelectionEvent ignored){}
+
+		@Override
+		public void keyPressed(KeyEvent event)
+		{
+			if(event.keyCode == '\r' || event.keyCode == '\n')
+			{
+				settings.aphConversionFileName = text.getText();
+				if(settings.aphConversionFileName.length() == 0)
+					settings.aphConversionFileName = null;
+				setTableListLabelToolTip();
 				shell.dispose();
 			}
 		}
@@ -546,7 +662,7 @@ public class Actions
 			if(inputLines.length == 0)
 				return;
 
-			ArrayList<String> outputLines = new ArrayList<>();
+			ArrayList<String> outputLines = new ArrayList<>(inputLines.length);
 
 			for(String inputLine : inputLines)
 			{
@@ -559,8 +675,8 @@ public class Actions
 				String outputLine = "";
 				try
 				{
-					if(usingAPH)
-						outputLine = LibLouisAPH.louisTranslateString(inputLine, settings.aphTableList, null, null, null);
+					if(settings.usingAPH)
+						outputLine = LibLouisAPH.translateForward(inputLine, settings.aphTableList, settings.aphConversionFileName, null, null);
 					else
 						outputLine = LibLouis.translateString(settings.louTableList, inputLine, inputLine.length() * 3, null, null, 0);
 				}
@@ -571,7 +687,7 @@ public class Actions
 				}
 				catch(UnsatisfiedLinkError error)
 				{
-					if(usingAPH)
+					if(settings.usingAPH)
 						Message.messageError("Invalid liblouisAPH library:  " + settings.aphLibraryFileName, error, true);
 					else
 						Message.messageError("Invalid liblouis library:  " + settings.louLibraryFileName, error, true);
@@ -607,7 +723,7 @@ public class Actions
 			if(inputLines.length == 0)
 				return;
 
-			ArrayList<String> outputLines = new ArrayList<>();
+			ArrayList<String> outputLines = new ArrayList<>(inputLines.length);
 
 			for(String inputLine : inputLines)
 			{
@@ -620,8 +736,8 @@ public class Actions
 				String outputLine = "";
 				try
 				{
-					if(usingAPH)
-						outputLine = LibLouisAPH.louisBackTranslateString(inputLine, settings.aphTableList, null, null, null);
+					if(settings.usingAPH)
+						outputLine = LibLouisAPH.translateBackward(inputLine, settings.aphTableList, settings.aphConversionFileName, null, null);
 					else
 						outputLine = LibLouis.backTranslateString(settings.louTableList, inputLine, inputLine.length() * 3, null, null, 0);
 				}
@@ -632,7 +748,7 @@ public class Actions
 				}
 				catch(UnsatisfiedLinkError error)
 				{
-					if(usingAPH)
+					if(settings.usingAPH)
 						Message.messageError("Invalid liblouisAPH library:  " + settings.aphLibraryFileName, error, true);
 					else
 						Message.messageError("Invalid liblouis library:  " + settings.louLibraryFileName, error, true);
@@ -656,7 +772,7 @@ public class Actions
 		}
 	}
 
-	private final String asciiString =   " A1B'K2L@CIF/MSP\"E3H9O6R^DJG>NTQ,*5<-U8V.%[$+X!&;:4\\0Z7(_?W]#Y)=";
+	private static final String asciiString =   " A1B'K2L@CIF/MSP\"E3H9O6R^DJG>NTQ,*5<-U8V.%[$+X!&;:4\\0Z7(_?W]#Y)=";
 
 	private final class ConvertToUnicode extends BaseAction
 	{
@@ -748,7 +864,7 @@ public class Actions
 		protected ToolItem toolItem;
 		protected boolean enabled;
 
-		void addToMenuAndToolBar(Menu menu, ToolBar toolBar, String tag, int accelerator, boolean enabled)
+		void addToMenuAndToolBar(Menu menu, ToolBar toolBar, String tag, int accelerator, String iconFileName, boolean enabled)
 		{
 			this.enabled = enabled;
 
@@ -760,8 +876,8 @@ public class Actions
 			menuItem.setEnabled(enabled);
 
 			toolItem = new ToolItem(toolBar, SWT.PUSH);
-			//TODO:  add icon instead
-			toolItem.setText(tag);
+			toolItem.setImage(new Image(toolBar.getParent().getShell().getDisplay(), getClass().getResourceAsStream("/images/" + iconFileName)));
+			toolItem.setToolTipText(tag);
 			toolItem.addSelectionListener(this);
 			toolItem.setEnabled(enabled);
 		}

@@ -77,7 +77,7 @@ public class TextTranslate
 
 	public String[] getTextLines()
 	{
-		ArrayList<String> arrayList = new ArrayList<>();
+		ArrayList<String> arrayList = new ArrayList<>(textText.getLineCount());
 		for(int i = 0; i < textText.getLineCount(); i++)
 			arrayList.add(textText.getLine(i));
 
@@ -86,12 +86,12 @@ public class TextTranslate
 
 	public void setTextLines(String[] lines)
 	{
-		StringBuilder stringBuilder = new StringBuilder();
+		StringBuilder stringBuilder = new StringBuilder(lines.length * 100);
 		if(lines.length > 0)
 		{
 			stringBuilder.append(lines[0]);
 			for(int i = 1; i < lines.length; i++)
-				stringBuilder.append("\n" + lines[i]);
+				stringBuilder.append('\n').append(lines[i]);
 		}
 
 		textText.setText(stringBuilder.toString());
@@ -119,7 +119,7 @@ public class TextTranslate
 
 	public String[] getBrailleLines()
 	{
-		ArrayList<String> arrayList = new ArrayList<>();
+		ArrayList<String> arrayList = new ArrayList<>(textBraille.getLineCount());
 		for(int i = 0; i < textBraille.getLineCount(); i++)
 			arrayList.add(textBraille.getLine(i));
 
@@ -128,12 +128,12 @@ public class TextTranslate
 
 	public void setBrailleLines(String[] lines)
 	{
-		StringBuilder stringBuilder = new StringBuilder();
+		StringBuilder stringBuilder = new StringBuilder(lines.length * 100);
 		if(lines.length > 0)
 		{
 			stringBuilder.append(lines[0]);
 			for(int i = 1; i < lines.length; i++)
-				stringBuilder.append("\n" + lines[i]);
+				stringBuilder.append('\n').append(lines[i]);
 		}
 
 		textBraille.setText(stringBuilder.toString());

@@ -24,6 +24,13 @@ import java.io.UnsupportedEncodingException;
 public class LibLouisAPH
 {
 	static final LibLouisAPHCallback libLouisAPHLog = new LibLouisAPHLog();
+	static final int LOG_ALL = 0;
+	static final int LOG_TRACE = 1;
+	static final int LOG_DEBUG = 2;
+	static final int LOG_INFO = 3;
+	static final int LOG_WARNING = 4;
+	static final int LOG_ERROR = 5;
+	static final int LOG_FATAL = 6;
 	
 	public static void loadLibrary(String libraryPath)
 	{
@@ -68,7 +75,7 @@ public class LibLouisAPH
 		else
 			length = louis_translate_backward(dotsChars, dotsLength, charsChars, charsLength, tables, conversion, charsToDotsMapInts, dotsToCharsMapInts);
 		
-		if(length == 0)
+		if(length <= 0)
 			return null;
 		
 		if(charsToDotsMapInts != null)
@@ -103,6 +110,6 @@ class LibLouisAPHLog implements LibLouisAPHCallback
 	@Override
 	public void logMessage(int level, String message)
 	{
-		System.out.println(message);
+		Log.message(level, message, false);
 	}
 }

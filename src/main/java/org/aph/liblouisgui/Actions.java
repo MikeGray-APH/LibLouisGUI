@@ -48,6 +48,8 @@ public class Actions
 	private final Settings settings;
 	private final TextTranslate textTranslate;
 	private final Label tableListLabel;
+	
+	private final EditConversionFileNameAction editConversionFileNameAction;
 
 	public Actions(Shell parentShell, Settings settings, TextTranslate textTranslate, Label tableListLabel)
 	{
@@ -101,10 +103,10 @@ public class Actions
 		item.setText("&Settings");
 		item.setMenu(menu);
 
-		EditConversionFileNameAction editConversionFileNameAction = new EditConversionFileNameAction();
-		new SwitchLibraryHandler(editConversionFileNameAction).addToMenu(menu, "use", 0, true);
+		editConversionFileNameAction = new EditConversionFileNameAction();
+		new SwitchLibraryHandler().addToMenu(menu, "use", 0, true);
 		new MenuItem(menu, SWT.SEPARATOR);
-		new SetLibraryPathDialogAction().addToMenu(menu, "Set LibLouis Path", 0, true);
+		new SetLibraryPathDialogAction().addToMenu(menu, "Set Library Path", 0, true);
 		new SetTablePathDialogAction().addToMenu(menu, "Set Table Path", 0, true);
 		new EditTablePathAction().addToMenu(menu, "Edit Table Path", 0, true);
 		new EditTableListAction().addToMenu(menu, "Edit Tables", 0, true);
@@ -143,6 +145,7 @@ public class Actions
 		item.setMenu(menu);
 
 		new AboutHandler().addToMenu(menu, "About", 0, true);
+		new ShowLog().addToMenu(menu, "Show Log", 0, true);
 	}
 
 	private void setTableListLabelToolTip()
@@ -181,13 +184,6 @@ public class Actions
 
 	private final class SwitchLibraryHandler extends BaseAction
 	{
-		final EditConversionFileNameAction editConversionFileNameAction;
-
-		public SwitchLibraryHandler(EditConversionFileNameAction editConversionFileNameAction)
-		{
-			this.editConversionFileNameAction = editConversionFileNameAction;
-		}
-		
 		@Override
 		void addToMenu(Menu menu, String tag, int accelerator, boolean enabled)
 		{
@@ -211,7 +207,8 @@ public class Actions
 				else
 					tableListLabel.setText("Tables:");
 
-				editConversionFileNameAction.menuItem.setEnabled(true);
+				editConversionFileNameAction.setEnabled(true);
+				parentShell.setText("LibLouisAPH");
 			}
 			else
 			{
@@ -221,7 +218,8 @@ public class Actions
 				else
 					tableListLabel.setText("Tables:");
 
-				editConversionFileNameAction.menuItem.setEnabled(false);
+				editConversionFileNameAction.setEnabled(false);
+				parentShell.setText("LibLouis");
 			}
 			setTableListLabelToolTip();
 		}
@@ -244,9 +242,9 @@ public class Actions
 			if(!new File(fileName).exists())
 			{
 				if(settings.usingAPH)
-					Message.messageError("LibLouisAPH library does not exist:  " + fileName, true);
+					Log.message(Log.LOG_ERROR, "LibLouisAPH library does not exist:  " + fileName, true);
 				else
-					Message.messageError("LibLouis library does not exist:  " + fileName, true);
+					Log.message(Log.LOG_ERROR, "LibLouis library does not exist:  " + fileName, true);
 				return;
 			}
 
@@ -268,9 +266,9 @@ public class Actions
 			catch(UnsatisfiedLinkError error)
 			{
 				if(settings.usingAPH)
-					Message.messageError("Invalid LibLouisAPH library:  " + fileName, error, true);
+					Log.message(Log.LOG_ERROR, "Invalid LibLouisAPH library:  " + fileName, error, true);
 				else
-					Message.messageError("Invalid LibLouis library:  " + fileName, error, true);
+					Log.message(Log.LOG_ERROR, "Invalid LibLouis library:  " + fileName, error, true);
 				return;
 			}
 
@@ -308,9 +306,9 @@ public class Actions
 			catch(UnsatisfiedLinkError error)
 			{
 				if(settings.usingAPH)
-					Message.messageError("Invalid liblouisAPH library:  " + settings.aphLibraryFileName, error, true);
+					Log.message(Log.LOG_ERROR, "Invalid liblouisAPH library:  " + settings.aphLibraryFileName, error, true);
 				else
-					Message.messageError("Invalid liblouis library:  " + settings.louLibraryFileName, error, true);
+					Log.message(Log.LOG_ERROR, "Invalid liblouis library:  " + settings.louLibraryFileName, error, true);
 			}
 		}
 	}
@@ -382,9 +380,9 @@ public class Actions
 			catch(UnsatisfiedLinkError error)
 			{
 				if(settings.usingAPH)
-					Message.messageError("Invalid liblouisAPH library:  " + settings.aphLibraryFileName, error, true);
+					Log.message(Log.LOG_ERROR, "Invalid liblouisAPH library:  " + settings.aphLibraryFileName, error, true);
 				else
-					Message.messageError("Invalid liblouis library:  " + settings.louLibraryFileName, error, true);
+					Log.message(Log.LOG_ERROR, "Invalid liblouis library:  " + settings.louLibraryFileName, error, true);
 			}
 		}
 
@@ -655,8 +653,16 @@ public class Actions
 		@Override
 		public void widgetSelected(SelectionEvent ignored)
 		{
-			if(!settings.areLouLibraryFilesValid(true))
-				return;
+			if(settings.usingAPH)
+			{
+				if(!settings.areAPHLibraryFilesValid(true))
+					return;
+			}
+			else
+			{
+				if(!settings.areLouLibraryFilesValid(true))
+					return;
+			}
 
 			String inputLines[] = textTranslate.getTextLines();
 			if(inputLines.length == 0)
@@ -682,27 +688,30 @@ public class Actions
 				}
 				catch(UnsupportedEncodingException exception)
 				{
-					Message.messageError("UnsupportedEncodingException", exception, true);
+					Log.message(Log.LOG_ERROR, "UnsupportedEncodingException", exception, true);
 					return;
 				}
 				catch(UnsatisfiedLinkError error)
 				{
 					if(settings.usingAPH)
-						Message.messageError("Invalid liblouisAPH library:  " + settings.aphLibraryFileName, error, true);
+						Log.message(Log.LOG_ERROR, "Invalid liblouisAPH library:  " + settings.aphLibraryFileName, error, true);
 					else
-						Message.messageError("Invalid liblouis library:  " + settings.louLibraryFileName, error, true);
+						Log.message(Log.LOG_ERROR, "Invalid liblouis library:  " + settings.louLibraryFileName, error, true);
 					return;
 				}
 				catch(Exception exception)
 				{
-					Message.messageError("Exception", exception, true);
+					Log.message(Log.LOG_ERROR, "Exception", exception, true);
 				}
 				catch(Error error)
 				{
-					Message.messageError("Error", error, true);
+					Log.message(Log.LOG_ERROR, "Error", error, true);
 				}
 				if(outputLine == null)
-					Message.messageError("Translation error for:  " + inputLine, true);
+				{
+					Log.message(Log.LOG_ERROR, "Translation error for line:  " + inputLine, false);
+					outputLines.add("");
+				}
 				else
 					outputLines.add(outputLine);
 			}
@@ -716,12 +725,21 @@ public class Actions
 		@Override
 		public void widgetSelected(SelectionEvent ignored)
 		{
-			if(!settings.areLouLibraryFilesValid(true))
-				return;
+			if(settings.usingAPH)
+			{
+				if(!settings.areAPHLibraryFilesValid(true))
+					return;
+			}
+			else
+			{
+				if(!settings.areLouLibraryFilesValid(true))
+					return;
+			}
 
 			String inputLines[] = textTranslate.getBrailleLines();
 			if(inputLines.length == 0)
 				return;
+			
 
 			ArrayList<String> outputLines = new ArrayList<>(inputLines.length);
 
@@ -743,27 +761,31 @@ public class Actions
 				}
 				catch(UnsupportedEncodingException exception)
 				{
-					Message.messageError("UnsupportedEncodingException", exception, true);
+					Log.message(Log.LOG_ERROR, "UnsupportedEncodingException", exception, true);
 					return;
 				}
 				catch(UnsatisfiedLinkError error)
 				{
 					if(settings.usingAPH)
-						Message.messageError("Invalid liblouisAPH library:  " + settings.aphLibraryFileName, error, true);
+						Log.message(Log.LOG_ERROR, "Invalid liblouisAPH library:  " + settings.aphLibraryFileName, error, true);
 					else
-						Message.messageError("Invalid liblouis library:  " + settings.louLibraryFileName, error, true);
+						Log.message(Log.LOG_ERROR, "Invalid liblouis library:  " + settings.louLibraryFileName, error, true);
 					return;
 				}
 				catch(Exception exception)
 				{
-					Message.messageError("Exception", exception, true);
+					Log.message(Log.LOG_ERROR, "Translation failed:  Exception", exception, false);
+					textTranslate.setTextLines(null);
 				}
 				catch(Error error)
 				{
-					Message.messageError("Error", error, true);
+					Log.message(Log.LOG_ERROR, "Error", error, true);
 				}
 				if(outputLine == null)
-					Message.messageError("Translation error for:  " + inputLine, true);
+				{
+					Log.message(Log.LOG_ERROR, "Translation error for line:  " + inputLine, false);
+					outputLines.add("");
+				}
 				else
 					outputLines.add(outputLine);
 			}
@@ -855,6 +877,15 @@ public class Actions
 			while(!dialog.isDisposed())
 				if(!dialog.getDisplay().readAndDispatch())
 					dialog.getDisplay().sleep();
+		}
+	}
+	
+	private final class ShowLog extends BaseAction
+	{
+		@Override
+		public void widgetSelected(SelectionEvent ignored)
+		{
+			textTranslate.setText(Log.getMessageString());
 		}
 	}
 

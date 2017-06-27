@@ -41,7 +41,7 @@ public class Main
 		shell.setLayout(new GridLayout(1, true));
 		shell.setText("LibLouisGUI");
 
-		Message.setShell(shell);
+		Log.setShell(shell);
 
 		//   load fonts
 		loadFont("APH_Braille_Font-6.otf");
@@ -69,7 +69,7 @@ public class Main
 				}
 				catch(UnsatisfiedLinkError error)
 				{
-					Message.messageError("Invalid LibLouis library:  " + settings.louLibraryFileName, error, true);
+					Log.message(Log.LOG_ERROR, "Invalid LibLouis library:  " + settings.louLibraryFileName, error, true);
 				}
 			}
 
@@ -82,10 +82,14 @@ public class Main
 				}
 				catch(UnsatisfiedLinkError error)
 				{
-					Message.messageError("Invalid LibLouisAPH library:  " + settings.aphLibraryFileName, error, true);
+					Log.message(Log.LOG_ERROR, "Invalid LibLouisAPH library:  " + settings.aphLibraryFileName, error, true);
 				}
 			}
 		}
+		if(settings.usingAPH)
+			shell.setText("LibLouisAPH");
+		else
+			shell.setText("LibLouis");
 
 		TextTranslate textTranslate = new TextTranslate(shell);
 
@@ -126,11 +130,11 @@ public class Main
 		}
 		catch(FileNotFoundException exception)
 		{
-			Message.messageError("ERROR:  Unable to open font file:  " + exception.getMessage());
+			Log.message(Log.LOG_ERROR, "ERROR:  Unable to open font file:  " + exception.getMessage());
 		}
 		catch(IOException exception)
 		{
-			Message.messageError("ERROR:  Unable to read font file:  " + exception.getMessage());
+			Log.message(Log.LOG_ERROR, "ERROR:  Unable to read font file:  " + exception.getMessage());
 		}
 	}
 

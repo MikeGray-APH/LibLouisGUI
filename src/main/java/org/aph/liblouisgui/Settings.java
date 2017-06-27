@@ -123,7 +123,7 @@ public class Settings
 	{
 		if(!file.exists())
 		{
-			Message.messageError("Settings file not found:  " + file.getPath(), false);
+			Log.message(Log.LOG_WARNING, "Settings file not found:  " + file.getPath(), false);
 			return false;
 		}
 
@@ -138,11 +138,11 @@ public class Settings
 				try
 				{
 					if(!readLine(line))
-						Message.messageError("Unknown setting, line #" + lineNumber, line + " -- " + file.getPath(), false);
+						Log.message(Log.LOG_ERROR, "Unknown setting, line #" + lineNumber, line + " -- " + file.getPath(), false);
 				}
 				catch(NumberFormatException ignored)
 				{
-					Message.messageError("Bad setting value, line #" + lineNumber, line + " -- " + file.getPath(), false);
+					Log.message(Log.LOG_ERROR, "Bad setting value, line #" + lineNumber, line + " -- " + file.getPath(), false);
 				}
 				finally
 				{
@@ -152,11 +152,11 @@ public class Settings
 		}
 		catch(FileNotFoundException exception)
 		{
-			Message.messageError("Unable to open settings file for reading", exception);
+			Log.message(Log.LOG_ERROR, "Unable to open settings file for reading", exception);
 		}
 		catch(IOException exception)
 		{
-			Message.messageError("Unable to read settings file", exception);
+			Log.message(Log.LOG_ERROR, "Unable to read settings file", exception);
 		}
 		finally
 		{
@@ -167,7 +167,7 @@ public class Settings
 			}
 			catch(IOException exception)
 			{
-				Message.messageError("Unable to close settings file", exception);
+				Log.message(Log.LOG_ERROR, "Unable to close settings file", exception);
 			}
 		}
 
@@ -231,7 +231,7 @@ public class Settings
 		}
 		catch(IOException exception)
 		{
-			Message.messageError("Unable to create settings file", exception);
+			Log.message(Log.LOG_ERROR, "Unable to create settings file", exception);
 			return false;
 		}
 
@@ -243,7 +243,7 @@ public class Settings
 		}
 		catch(FileNotFoundException exception)
 		{
-			Message.messageError("Unable to open settings file for writing", exception);
+			Log.message(Log.LOG_ERROR, "Unable to open settings file for writing", exception);
 			return false;
 		}
 		finally
@@ -260,14 +260,14 @@ public class Settings
 		if(louLibraryFileName == null)
 		{
 			if(outMessage)
-				Message.messageError("LibLouis library not set", true);
+				Log.message(Log.LOG_WARNING, "LibLouis library not set", true);
 			return false;
 		}
 
 		if(!new File(louLibraryFileName).exists())
 		{
 			if(outMessage)
-				Message.messageError("LibLouis library does not exist:  " + louLibraryFileName, true);
+				Log.message(Log.LOG_WARNING, "LibLouis library does not exist:  " + louLibraryFileName, true);
 			return false;
 		}
 
@@ -275,14 +275,14 @@ public class Settings
 //		if(louTablePath == null)
 //		{
 //			if(outMessage)
-//				Message.messageError("Table path not set", true);
+//				Log.message("Table path not set", true);
 //			return false;
 //		}
 
 		if(louTableList == null)
 		{
 			if(outMessage)
-				Message.messageError("Tables not set", true);
+				Log.message(Log.LOG_ERROR, "Tables not set", true);
 			return false;
 		}
 
@@ -294,14 +294,14 @@ public class Settings
 		if(aphLibraryFileName == null)
 		{
 			if(outMessage)
-				Message.messageError("LibLouisAPH library not set", true);
+				Log.message(Log.LOG_WARNING, "LibLouisAPH library not set", true);
 			return false;
 		}
 
 		if(!new File(aphLibraryFileName).exists())
 		{
 			if(outMessage)
-				Message.messageError("LibLouisAPH library does not exist:  " + aphLibraryFileName, true);
+				Log.message(Log.LOG_WARNING, "LibLouisAPH library does not exist:  " + aphLibraryFileName, true);
 			return false;
 		}
 
@@ -309,14 +309,14 @@ public class Settings
 //		if(aphTablePath == null)
 //		{
 //			if(outMessage)
-//				Message.messageError("Table path not set", true);
+//				Log.message("Table path not set", true);
 //			return false;
 //		}
 
 		if(aphTableList == null)
 		{
 			if(outMessage)
-				Message.messageError("Tables not set", true);
+				Log.message(Log.LOG_WARNING, "Tables not set", true);
 			return false;
 		}
 

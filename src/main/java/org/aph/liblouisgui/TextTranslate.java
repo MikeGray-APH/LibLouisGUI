@@ -86,6 +86,12 @@ public class TextTranslate
 
 	public void setTextLines(String[] lines)
 	{
+		if(lines == null)
+		{
+			textText.setText("");
+			return;
+		}
+
 		StringBuilder stringBuilder = new StringBuilder(lines.length * 100);
 		if(lines.length > 0)
 		{
@@ -128,6 +134,12 @@ public class TextTranslate
 
 	public void setBrailleLines(String[] lines)
 	{
+		if(lines == null)
+		{
+			textBraille.setText("");
+			return;
+		}
+		
 		StringBuilder stringBuilder = new StringBuilder(lines.length * 100);
 		if(lines.length > 0)
 		{
